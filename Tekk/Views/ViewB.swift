@@ -10,7 +10,7 @@ import SwiftUI
 struct ViewB: View {
     var body: some View {
         ZStack {
-            Color.blue
+            Color.purple
         
             Image(systemName: "person.2.fill")
                 .foregroundColor(Color.white)
