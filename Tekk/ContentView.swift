@@ -34,35 +34,11 @@ struct ContentView: View {
         .accentColor(.green)
     }
     
-    func sendMessage(message: String) {
-        withAnimation {
-            chatMessages.append("[USER]" + message)
-            self.messageText = ""
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            chatMessages.append(getBotResponse(message: message))
-        }
-    }
-    
-//    func sendMessage(message: String) {
-//        guard !message.isEmpty else { return }
-//        chatMessages.append("You: \(message)")
-//        messageText = ""
-//
-//        // Make the network request to the Gemini API
-//        getBotResponse(prompt: message) { response in
-//            DispatchQueue.main.async {
-//                chatMessages.append("Coach: \(response)")
-//            }
-//        }
-//    }
-
-    
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+            .previewDevice("iPhone 15 Pro Max")
     }
 }
