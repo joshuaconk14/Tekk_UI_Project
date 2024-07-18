@@ -7,9 +7,17 @@
 
 import SwiftUI
 
+struct Message_Struct: Identifiable {
+    let id = UUID()
+    let content: String
+}
+
 struct View_Chatbot: View {
+//    @State private var messageText = ""
+//    @State var messages: [String] = ["Welcome to TekkAI"]
     @State private var messageText = ""
-    @State var messages: [String] = ["Welcome to TekkAI"]
+    @Binding var messages: [Message_Struct]
+    var sendMessage: (String) -> Void
     
     var body: some View {
         VStack {
@@ -24,9 +32,9 @@ struct View_Chatbot: View {
             }
             
             ScrollView {
-                ForEach(messages, id: \.self) { message in
-                    if message.contains("[USER]") {
-                        let newMessage = message.replacingOccurrences(of:
+                ForEach(messages) { message in
+                    if message.content.contains("[USER]") {
+                        let newMessage = message.content.replacingOccurrences(of:
                             "[USER]", with: "")
                         
                         HStack {
@@ -41,7 +49,7 @@ struct View_Chatbot: View {
                         }
                     } else {
                         HStack {
-                            Text(message)
+                            Text(message.content)
                                 .padding()
                                 .background(.gray.opacity(0.15))
                                 .cornerRadius(10)
@@ -60,11 +68,13 @@ struct View_Chatbot: View {
                     .background(Color.gray.opacity(0.1))
                     .cornerRadius(8)
                     .onSubmit {
-                        sendMessage(message: messageText)
+                        sendMessage(messageText)
+                        messageText = ""
                     }
                 
                 Button {
-                    sendMessage(message: messageText)
+                    sendMessage(messageText)
+                    messageText = ""
                 } label: {
                     Image(systemName: "paperplane.fill")
                         .foregroundColor(.green)
@@ -75,16 +85,13 @@ struct View_Chatbot: View {
         }
     }
     
-    func sendMessage(message: String) {
-        withAnimation {
-            messages.append("[USER]" + message)
-            self.messageText = ""
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            messages.append(getBotResponse(message: message))
-        }
-    
+//    func sendMessage(message: String) {
+//        withAnimation {
+//            messages.append("[USER]" + message)
+//            self.messageText = ""
+//        }
+//
+//    
 //        // testing fastapi
 //        let playerDetails = ["name": "Joe Lolley", "age": 18, "position": "LW"] as [String : Any]
 //        let url = URL(string: "http://127.0.0.1:8000/generate_tutorial/")!
@@ -120,10 +127,15 @@ struct View_Chatbot: View {
 //        }
 //        
 //        task.resume()
-        
-    }
+//        
+//        
+////        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+////            messages.append(getBotResponse(message: message))
+////        }
+//        
+//    }
 }
 
 #Preview {
-    View_Chatbot()
+    View_Chatbot(messages: .constant([Message_Struct(content: "Welcome to TekkAI")]), sendMessage: { _ in })
 }
