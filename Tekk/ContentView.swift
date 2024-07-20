@@ -13,6 +13,7 @@ struct ContentView: View {
     @State private var messageText = ""
     @State var chatMessages: [Message_Struct] = [Message_Struct(content: "Welcome to TekkAI")]
     
+    // main view
     var body: some View {
         TabView {
             View_Chatbot(messages: $chatMessages, sendMessage: sendMessage)
@@ -41,10 +42,11 @@ struct ContentView: View {
         }
 
     
-        // testing fastapi
+        // connecting to FastAPI locally
         let playerDetails = ["name": "Joe Lolley", "age": 18, "position": "LW"] as [String : Any]
         let url = URL(string: "http://127.0.0.1:8000/generate_tutorial/")!
         var request = URLRequest(url: url)
+        // HTTP POST request to get tutorial from backend
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
@@ -53,6 +55,7 @@ struct ContentView: View {
             "player_details": playerDetails
         ]
         
+        // attempt to serialize the response
         request.httpBody = try? JSONSerialization.data(withJSONObject: parameters, options: [])
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
