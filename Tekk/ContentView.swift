@@ -16,15 +16,15 @@ struct ContentView: View {
     // main view
     var body: some View {
         TabView {
-            View_Chatbot(messages: $chatMessages, sendMessage: sendMessage)
-                .tabItem() {
-                    Image(systemName: "message.fill")
-                    Text("Chat")
-                }
             ViewB()
                 .tabItem() {
                     Image(systemName: "person.2.fill")
                     Text("Contacts")
+                }
+            View_Chatbot(messages: $chatMessages, sendMessage: sendMessage)
+                .tabItem() {
+                    Image(systemName: "message.fill")
+                    Text("Chat")
                 }
             ViewC()
                 .tabItem() {
