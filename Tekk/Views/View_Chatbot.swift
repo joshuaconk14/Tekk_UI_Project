@@ -7,9 +7,18 @@
 
 import SwiftUI
 
+struct Message_Struct: Identifiable {
+    let id = UUID()
+    let role: String
+    let content: String
+}
+
 struct View_Chatbot: View {
+//    @State private var messageText = ""
+//    @State var chatMessages: [String] = ["Welcome to TekkAI"]
     @State private var messageText = ""
-    @State var messages: [String] = ["Welcome to TekkAI"]
+    @Binding var chatMessages: [Message_Struct]
+    var sendMessage: (String) -> Void
     
     var body: some View {
         VStack {
@@ -24,9 +33,9 @@ struct View_Chatbot: View {
             }
             
             ScrollView {
-                ForEach(messages, id: \.self) { message in
-                    if message.contains("[USER]") {
-                        let newMessage = message.replacingOccurrences(of:
+                ForEach(chatMessages) { message in
+                    if message.content.contains("[USER]") {
+                        let newMessage = message.content.replacingOccurrences(of:
                             "[USER]", with: "")
                         
                         HStack {
@@ -41,7 +50,7 @@ struct View_Chatbot: View {
                         }
                     } else {
                         HStack {
-                            Text(message)
+                            Text(message.content)
                                 .padding()
                                 .background(.gray.opacity(0.15))
                                 .cornerRadius(10)
@@ -54,17 +63,21 @@ struct View_Chatbot: View {
             }.rotationEffect(.degrees(180))
                 .background(Color.gray.opacity(0.10))
             
-            HStack {
+            HStack {    
                 TextField("Lets get Tekky", text: $messageText)
                     .padding()
                     .background(Color.gray.opacity(0.1))
                     .cornerRadius(8)
+                    // Case 1: user presses 'enter' on keyboard
                     .onSubmit {
-                        sendMessage(message: messageText)
+                        sendMessage(messageText)
+                        messageText = ""
                     }
                 
+                // Case 2: user clicks on submit button
                 Button {
-                    sendMessage(message: messageText)
+                    sendMessage(messageText)
+                    messageText = ""
                 } label: {
                     Image(systemName: "paperplane.fill")
                         .foregroundColor(.green)
@@ -74,56 +87,16 @@ struct View_Chatbot: View {
             }.padding()
         }
     }
-    
-    func sendMessage(message: String) {
-        withAnimation {
-            messages.append("[USER]" + message)
-            self.messageText = ""
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            messages.append(getBotResponse(message: message))
-        }
-    
-//        // testing fastapi
-//        let playerDetails = ["name": "Joe Lolley", "age": 18, "position": "LW"] as [String : Any]
-//        let url = URL(string: "http://127.0.0.1:8000/generate_tutorial/")!
-//        var request = URLRequest(url: url)
-//        request.httpMethod = "POST"
-//        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//        
-//        let parameters: [String: Any] = [
-//            "prompt": message,
-//            "player_details": playerDetails
-//        ]
-//        
-//        request.httpBody = try? JSONSerialization.data(withJSONObject: parameters, options: [])
-//        
-//        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-//            guard let data = data, error == nil else {
-//                print("Error: \(error?.localizedDescription ?? "No data")")
-//                return
-//            }
-//            
-//            // If valid URL response, return status code 200 and proceed
-//            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-//                // try to parse json response and extract tutorial string
-//                if let responseObject = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-//                   let tutorial = responseObject["tutorial"] as? String {
-//                    DispatchQueue.main.async {
-//                        self.messages.append(tutorial)
-//                    }
-//                }
-//            } else {
-//                print("HTTP Response: \(response.debugDescription)")
-//            }
-//        }
-//        
-//        task.resume()
-        
-    }
+
 }
 
 #Preview {
-    View_Chatbot()
+    View_Chatbot(chatMessages: .constant([Message_Struct(role: "assistant", content: "Welcome to TekkAI")]), sendMessage: { _ in })
 }
+
+
+/*
+ import swiftui
+ 
+ 
+ */
