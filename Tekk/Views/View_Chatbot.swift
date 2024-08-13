@@ -9,14 +9,15 @@ import SwiftUI
 
 struct Message_Struct: Identifiable {
     let id = UUID()
+    let role: String
     let content: String
 }
 
 struct View_Chatbot: View {
 //    @State private var messageText = ""
-//    @State var messages: [String] = ["Welcome to TekkAI"]
+//    @State var chatMessages: [String] = ["Welcome to TekkAI"]
     @State private var messageText = ""
-    @Binding var messages: [Message_Struct]
+    @Binding var chatMessages: [Message_Struct]
     var sendMessage: (String) -> Void
     
     var body: some View {
@@ -32,7 +33,7 @@ struct View_Chatbot: View {
             }
             
             ScrollView {
-                ForEach(messages) { message in
+                ForEach(chatMessages) { message in
                     if message.content.contains("[USER]") {
                         let newMessage = message.content.replacingOccurrences(of:
                             "[USER]", with: "")
@@ -62,16 +63,18 @@ struct View_Chatbot: View {
             }.rotationEffect(.degrees(180))
                 .background(Color.gray.opacity(0.10))
             
-            HStack {
+            HStack {    
                 TextField("Lets get Tekky", text: $messageText)
                     .padding()
                     .background(Color.gray.opacity(0.1))
                     .cornerRadius(8)
+                    // Case 1: user presses 'enter' on keyboard
                     .onSubmit {
                         sendMessage(messageText)
                         messageText = ""
                     }
                 
+                // Case 2: user clicks on submit button
                 Button {
                     sendMessage(messageText)
                     messageText = ""
@@ -88,5 +91,12 @@ struct View_Chatbot: View {
 }
 
 #Preview {
-    View_Chatbot(messages: .constant([Message_Struct(content: "Welcome to TekkAI")]), sendMessage: { _ in })
+    View_Chatbot(chatMessages: .constant([Message_Struct(role: "assistant", content: "Welcome to TekkAI")]), sendMessage: { _ in })
 }
+
+
+/*
+ import swiftui
+ 
+ 
+ */
