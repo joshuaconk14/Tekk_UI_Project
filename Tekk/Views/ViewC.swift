@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ViewC: View {
+struct CameraView: View {
     var body: some View {
         ZStack {
             Color.green
@@ -20,5 +20,5 @@ struct ViewC: View {
 }
 
 #Preview {
-    ViewC()
+    CameraView()
 }

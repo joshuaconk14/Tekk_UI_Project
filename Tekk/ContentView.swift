@@ -15,19 +15,19 @@ struct ContentView: View {
     // main view
     var body: some View {
         TabView {
-            ViewB()
-                .tabItem() {
-                    Image(systemName: "person.2.fill")
-                    Text("Contacts")
-                }
             // chatMessages binded, sendMessage passed as closure
-            View_Chatbot(chatMessages: $chatMessages, sendMessage: sendMessage)
+            ChatbotView(chatMessages: $chatMessages, sendMessage: sendMessage)
                 .tabItem() {
                     Image(systemName: "message.fill")
                     Text("Chat")
                 }
-            ViewC()
-                .tabItem() {
+            CameraView()
+                .tabItem {
+                    Image(systemName: "camera.fill")
+                    Text("Camera")
+                }
+            SettingsView()
+                .tabItem {
                     Image(systemName: "slider.horizontal.3")
                     Text("Settings")
                 }
@@ -84,11 +84,6 @@ struct ContentView: View {
         }
         
         task.resume()
-        
-        
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-//            messages.append(getBotResponse(message: message))
-//        }
         
     }
     
