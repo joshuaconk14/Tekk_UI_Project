@@ -22,6 +22,7 @@ struct ChatbotView: View {
     
     var body: some View {
         GeometryReader { geometry in
+            // Allow ChatbotHistoryView to show in front of ChatbotView
             ZStack {
                 // Main chat view
                 VStack {
