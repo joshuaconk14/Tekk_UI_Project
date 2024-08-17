@@ -53,10 +53,10 @@ struct SettingsView: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 100, height: 100)
-                .foregroundColor(.black)
+                .foregroundColor(.green)
                 .padding()
-                .background(Circle().fill(Color.black.opacity(0.2)))
-                .overlay(Circle().stroke(Color.black, lineWidth: 4))
+                .background(Circle().fill(Color.white))
+                .overlay(Circle().stroke(Color.green, lineWidth: 4))
                 .shadow(radius: 10)
             
             Text("Your Profile")
@@ -72,7 +72,14 @@ struct SettingsView: View {
             customTextField(title: "Email", text: $email, icon: "envelope.fill")
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 15).fill(Color.white.opacity(0.8)))
+        .background(
+            RoundedRectangle(cornerRadius: 15)
+                .fill(Color.white)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 15)
+                        .stroke(Color.green, lineWidth: 2) // Green outline
+                )
+        )
         .shadow(radius: 5)
     }
     
