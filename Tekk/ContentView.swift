@@ -41,7 +41,7 @@ struct ContentView: View {
             self.messageText = ""
         }
 
-    
+
         // connecting to FastAPI locally
         let playerDetails = ["name": "Joe Lolley", "age": 18, "position": "LW"] as [String : Any]
         
