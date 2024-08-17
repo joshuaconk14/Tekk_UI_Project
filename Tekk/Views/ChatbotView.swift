@@ -22,8 +22,7 @@ struct ChatbotView: View {
     
     var body: some View {
         GeometryReader { geometry in
-            // Allow ChatbotHistoryView to show in front of ChatbotView
-            ZStack {
+            ZStack(alignment: .leading) {
                 // Main chat view
                 VStack {
                     // Header
@@ -82,26 +81,26 @@ struct ChatbotView: View {
                 }
                 .zIndex(0)
                 
-                // Overlay when history is showing
-                Color.black
-                    .opacity(isShowingHistory ? 0.5 : 0)
-                    .ignoresSafeArea()
-                    .zIndex(1)
-                    .onTapGesture {
-                        withAnimation(.spring()) {
-                            isShowingHistory = false
+                // Overlay when history is showing (only over the chat area)
+                if isShowingHistory {
+                    Color.black.opacity(0.3)
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+                        .transition(.opacity)
+                        .onTapGesture {
+                            withAnimation(.spring()) {
+                                isShowingHistory = false
+                            }
                         }
-                    }
+                        .zIndex(1)
+                }
                 
                 // Sliding chat history view
-                HStack {
+                if isShowingHistory {
                     ChatHistoryView(isShowingHistory: $isShowingHistory, selectedSessionID: $selectedSessionID)
                         .frame(width: geometry.size.width * 0.75)
-                        .offset(x: isShowingHistory ? 0 : -geometry.size.width * 0.75)
-                    
-                    Spacer()
+                        .transition(.move(edge: .leading))
+                        .zIndex(2)
                 }
-                .zIndex(2)
             }
         }
     }
@@ -141,7 +140,12 @@ struct ChatHistoryView: View {
     @Binding var isShowingHistory: Bool
     @Binding var selectedSessionID: String
     
-    @State private var sessionIDs: [String] = []
+    @State private var sessionIDs: [String] = [
+        "TEKK",
+        "mini",
+        "4o",
+        "CO Landing page"
+    ]
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -150,27 +154,34 @@ struct ChatHistoryView: View {
                 .padding(.top, 20)
                 .padding(.leading, 10)
             
-            List(sessionIDs, id: \.self) { sessionID in
-                Button(action: {
-                    selectedSessionID = sessionID
-                    withAnimation(.spring()) {
-                        isShowingHistory = false
+            ScrollView {
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(sessionIDs, id: \.self) { sessionID in
+                        Button(action: {
+                            selectedSessionID = sessionID
+                            withAnimation(.spring()) {
+                                isShowingHistory = false
+                            }
+                        }) {
+                            HStack {
+                                Text(sessionID)
+                                    .foregroundColor(.primary)
+                                    .padding(.leading, 10)
+                                
+                                Spacer() // Pushes content to the left
+                            }
+                            .padding()
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(8)
+                        }
+                        .padding(.horizontal)
                     }
-                }) {
-                    Text(sessionID)
                 }
+                .padding(.top, 10)
             }
-            .onAppear(perform: loadSessionIDs)
-            
             Spacer()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.white)
-    }
-    
-    func loadSessionIDs() {
-        // Simulating session loading here. Replace this with your actual data fetching logic.
-        sessionIDs = ["Yesterday", "3 days ago", "Last week"]
     }
 }
 
