@@ -13,7 +13,7 @@ struct Message_Struct: Identifiable {
     let content: String
 }
 
-struct View_Chatbot: View {
+struct ChatbotView: View {
 //    @State private var messageText = ""
 //    @State var chatMessages: [String] = ["Welcome to TekkAI"]
     @State private var messageText = ""
@@ -91,7 +91,7 @@ struct View_Chatbot: View {
 }
 
 #Preview {
-    View_Chatbot(chatMessages: .constant([Message_Struct(role: "assistant", content: "Welcome to TekkAI")]), sendMessage: { _ in })
+    ChatbotView(chatMessages: .constant([Message_Struct(role: "assistant", content: "Welcome to TekkAI")]), sendMessage: { _ in })
 }
 
 
