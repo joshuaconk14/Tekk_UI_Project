@@ -22,6 +22,7 @@ struct ChatbotView: View {
     
     var body: some View {
         GeometryReader { geometry in
+            // Allow ChatbotHistoryView to show in front of ChatbotView
             ZStack {
                 // Main chat view
                 VStack {
@@ -176,5 +177,3 @@ struct ChatHistoryView: View {
 #Preview {
     ChatbotView(chatMessages: .constant([Message_Struct(role: "assistant", content: "Welcome to TekkAI")]), sendMessage: { _ in })
 }
-
-
