@@ -10,7 +10,7 @@ import SwiftUI
 struct Message_Struct: Identifiable {
     let id = UUID()
     let role: String
-    let content: String
+    var content: String
 }
 
 // Main chatbot view of the app
