@@ -8,26 +8,28 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @State private var name = ""
-    @State private var email = ""
+    @State private var name = "Jordan Conklin"
+    @State private var email = "jordinhoconk@gmail.com"
     @State private var showDeleteConfirmation = false
-    @State private var ballPosition = CGPoint(x: UIScreen.main.bounds.width / 2, y: 100)
-    @State private var ballVelocity = CGPoint(x: 3, y: 4)
-    @State private var ballSize: CGFloat = 50
 
     var body: some View {
         ZStack {
-            Color.white.edgesIgnoringSafeArea(.all)
-                        
             ScrollView {
                 VStack(spacing: 20) {
                     profileHeader
                     
-                    profileInfoSection
+                    actionSection(title: "Account", buttons: [
+                        customActionButton(title: "Past Conversations", icon: "clock.fill"),
+                        customActionButton(title: "Share With a Friend", icon: "square.and.arrow.up.fill"),
+                        customActionButton(title: "Edit your details", icon: "pencil")
+                    ])
                     
-                    actionButtonsSection
-                    
-                    supportSection
+                    actionSection(title: "Settings", buttons: [
+                        customActionButton(title: "Report an Error", icon: "exclamationmark.bubble.fill"),
+                        customActionButton(title: "Talk to a Founder", icon: "phone.fill"),
+                        customActionButton(title: "Drop a Rating", icon: "star.fill"),
+                        customActionButton(title: "Follow our Socials", icon: "link")
+                    ])
                     
                     deleteAccountButton
                 }
@@ -48,100 +50,73 @@ struct SettingsView: View {
     }
     
     private var profileHeader: some View {
-        VStack {
-            Image(systemName: "person.circle.fill")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 100, height: 100)
-                .foregroundColor(.green)
-                .padding()
-                .background(Circle().fill(Color.white))
-                .overlay(Circle().stroke(Color.green, lineWidth: 4))
-                .shadow(radius: 10)
-            
-            Text("Your Profile")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .foregroundColor(.black)
-        }
-    }
-    
-    private var profileInfoSection: some View {
-        VStack(spacing: 15) {
-            customTextField(title: "Name", text: $name, icon: "person.fill")
-            customTextField(title: "Email", text: $email, icon: "envelope.fill")
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 15)
-                .fill(Color.white)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 15)
-                        .stroke(Color.green, lineWidth: 2) // Green outline
-                )
-        )
-        .shadow(radius: 5)
-    }
-    
-    private func customTextField(title: String, text: Binding<String>, icon: String) -> some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundColor(.black)
-            TextField(title, text: text)
-        }
-        .padding()
-        .background(RoundedRectangle(cornerRadius: 10).stroke(Color.black.opacity(0.5), lineWidth: 1))
-    }
-    
-    private var actionButtonsSection: some View {
-        VStack(spacing: 15) {
-            customActionButton(title: "Past Conversations", icon: "clock.fill")
-            customActionButton(title: "Share with a friend", icon: "square.and.arrow.up.fill")
-            customActionButton(title: "Edit your details", icon: "pencil")
-        }
-    }
-    
-    private var supportSection: some View {
-        VStack(spacing: 15) {
-            customActionButton(title: "Report an error", icon: "exclamationmark.triangle.fill")
-            customActionButton(title: "Talk to a founder", icon: "person.2.fill")
-            customActionButton(title: "Drop a rating", icon: "star.fill")
-            customActionButton(title: "Follow our socials", icon: "link")
-        }
-    }
-    
-    private func customActionButton(title: String, icon: String) -> some View {
-        Button(action: {
-            // Action here
-        }) {
-            HStack {
-                Image(systemName: icon)
-                    .foregroundColor(.black)
-                Text(title)
-                    .foregroundColor(.black)
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .foregroundColor(.black.opacity(0.7))
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(spacing: 10) {
+                Image(systemName: "person.circle.fill")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 60, height: 60)
+                    .foregroundColor(.green)
+                
+                VStack(alignment: .leading) {
+                    Text(name)
+                        .font(.headline)
+                        .fontWeight(.bold)
+                    
+                    Text(email)
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                }
             }
             .padding()
-            .background(RoundedRectangle(cornerRadius: 10).stroke(Color.black.opacity(0.6), lineWidth: 1))
+            .background(RoundedRectangle(cornerRadius: 15).fill(Color.white))
         }
-        .buttonStyle(PlainButtonStyle())
+    }
+    
+    private func actionSection(title: String, buttons: [AnyView]) -> some View {
+        VStack(alignment: .leading, spacing: 15) {
+            ForEach(buttons.indices, id: \.self) { index in
+                buttons[index]
+            }
+        }
+        .padding()
+        .background(RoundedRectangle(cornerRadius: 15).fill(Color.white.opacity(0.90)))
+        .shadow(radius: 1)
+    }
+    
+    private func customActionButton(title: String, icon: String) -> AnyView {
+        AnyView(
+            Button(action: {
+                // Action here
+            }) {
+                HStack {
+                    Image(systemName: icon)
+                        .foregroundColor(.green)
+                    Text(title)
+                        .foregroundColor(.black)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.black.opacity(0.7))
+                }
+                .padding()
+                .background(RoundedRectangle(cornerRadius: 10).fill(Color.white.opacity(0.90)))
+            }
+            .buttonStyle(PlainButtonStyle())
+        )
     }
     
     private var deleteAccountButton: some View {
         Button(action: {
             showDeleteConfirmation = true
         }) {
-            Text("Delete your account")
-                .foregroundColor(.black)
+            Text("Delete Account")
+                .foregroundColor(.white)
                 .padding()
                 .frame(maxWidth: .infinity)
-                .background(RoundedRectangle(cornerRadius: 10).stroke(Color.red, lineWidth: 1))
+                .background(RoundedRectangle(cornerRadius: 10).fill(Color.red))
         }
         .padding(.top, 20)
     }
-
 }
 
 struct SettingsView_Previews: PreviewProvider {
@@ -149,3 +124,4 @@ struct SettingsView_Previews: PreviewProvider {
         SettingsView()
     }
 }
+

@@ -46,8 +46,8 @@ struct ContentView: View {
         let playerDetails = ["name": "Joe Lolley", "age": 18, "position": "LW"] as [String : Any]
         
         // sending HTTP POST request to FastAPI app running locally
-        //let url = URL(string: "http://127.0.0.1:8000/generate_tutorial/")!
-        let url = URL(string: "http://10.0.0.129:8000/generate_tutorial/")!
+        let url = URL(string: "http://127.0.0.1:8000/generate_tutorial/")!
+//        let url = URL(string: "http://10.0.0.129:8000/generate_tutorial/")!
         var request = URLRequest(url: url)
         
         // HTTP POST request to get tutorial from backend

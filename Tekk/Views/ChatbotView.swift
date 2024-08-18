@@ -13,6 +13,7 @@ struct Message_Struct: Identifiable {
     let content: String
 }
 
+// Main chatbot view of the app
 struct ChatbotView: View {
     @State private var isShowingHistory = false
     @State private var selectedSessionID = ""
@@ -40,10 +41,14 @@ struct ChatbotView: View {
                             .font(.largeTitle)
                             .bold()
                         
-                        Image(systemName: "bubble.left.fill")
-                            .font(.system(size: 26))
-                            .foregroundColor(Color.green)
-                    }
+                        Button(action: {
+                            startNewConversation()
+                        }) {
+                            Image(systemName: "bubble.left.fill")
+                                .font(.system(size: 26))
+                                .foregroundColor(Color.green)
+                        }
+}
                     .padding()
                     
                     // Chat messages
@@ -104,12 +109,21 @@ struct ChatbotView: View {
             }
         }
     }
+    // Function to start a new conversation
+    private func startNewConversation() {
+        chatMessages.removeAll { message in
+            message.content != "Welcome to TekkAI"
+        }
+        // TODO: generate new session id
+        // selectedSessionID = generateNewSessionID()
+    }
 }
 
 struct MessageView: View {
     let message: Message_Struct
     
     var body: some View {
+        // User message
         if message.content.contains("[USER]") {
             let newMessage = message.content.replacingOccurrences(of: "[USER]", with: "")
             HStack {
@@ -122,6 +136,7 @@ struct MessageView: View {
                     .padding(.horizontal, 16)
                     .padding(.bottom, 10)
             }
+        // System message
         } else {
             HStack {
                 Text(message.content)
