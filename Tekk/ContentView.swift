@@ -11,7 +11,8 @@ import SwiftUI
 struct ContentView: View {
     @State private var messageText = "" // Current text input from user
     @State var chatMessages: [Message_Struct] = [Message_Struct(role: "system", content: "Welcome to TekkAI")] // Stores list of chat messages
-    
+    @State private var viewModel = ViewModel()
+
     // main view
     var body: some View {
         TabView {
@@ -21,7 +22,7 @@ struct ContentView: View {
                     Image(systemName: "message.fill")
                     Text("Chat")
                 }
-            CameraView()
+            CameraView(image: $viewModel.currentFrame)
                 .tabItem {
                     Image(systemName: "camera.fill")
                     Text("Camera")
