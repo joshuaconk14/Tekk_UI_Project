@@ -10,20 +10,12 @@ import AVFoundation
 
 class CameraManager: NSObject {
     // Performs real-time capture
-    private let captureSession = AVCaptureSession()
-    
-    // Describes the media input from a capture device to a capture session
-    private var deviceInput: AVCaptureDeviceInput?
-    
-    // Used to have access to video frames for processing
-    private var videoOutput: AVCaptureVideoDataOutput?
-    
-    // Represents the hardware or virtual capture device that can provide one or more streams of media of a particular type
-    private let systemPreferredCamera = AVCaptureDevice.default(for: .video)
-    
-    // the queue on which the AVCaptureVideoDataOutputSampleBufferDelegate callbacks should be invoked
-    private var sessionQueue = DispatchQueue(label: "video.preview.session")
-    
+    private let captureSession = AVCaptureSession() // Performs real-time capture
+    private var deviceInput: AVCaptureDeviceInput? // Describes the media input from a capture device to a capture session
+    private var videoOutput: AVCaptureVideoDataOutput? // Used to have access to video frames for processing
+    private let systemPreferredCamera = AVCaptureDevice.default(for: .video) // Represents the hardware or virtual capture device that can provide one or more streams of media of a particular type
+    private var sessionQueue = DispatchQueue(label: "video.preview.session") // the queue on which the AVCaptureVideoDataOutputSampleBufferDelegate callbacks should be invoked
+
     // If the user has not granted permission to access the camera, we will request it here
     private var isAuthorized: Bool {
         get async {
