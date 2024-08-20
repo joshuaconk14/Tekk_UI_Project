@@ -1,5 +1,5 @@
 //
-//  ViewB.swift
+//  SettingsView.swift
 //  Tekk-frontend
 //
 //  Created by Jordan on 7/6/24.

@@ -1,5 +1,5 @@
 //
-//  View_Chatbot.swift
+//  ChatbotView.swift
 //  Tekk-frontend
 //
 //  Created by Jordan on 7/6/24.
@@ -119,6 +119,7 @@ struct ChatbotView: View {
     }
 }
 
+// The messages in the chatbot corresponding to if message is from user or AI
 struct MessageView: View {
     let message: Message_Struct
     
@@ -151,6 +152,7 @@ struct MessageView: View {
     }
 }
 
+// View of previous user conversations
 struct ChatHistoryView: View {
     @Binding var isShowingHistory: Bool
     @Binding var selectedSessionID: String
