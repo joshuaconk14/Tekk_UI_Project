@@ -11,7 +11,8 @@ import SwiftUI
 struct ContentView: View {
     @State private var messageText = "" // Current text input from user
     @State var chatMessages: [Message_Struct] = [Message_Struct(role: "system", content: "Welcome to TekkAI")] // Stores list of chat messages
-    
+    @State private var viewModel = ViewModel()
+
     // main view
     var body: some View {
         TabView {
@@ -21,7 +22,7 @@ struct ContentView: View {
                     Image(systemName: "message.fill")
                     Text("Chat")
                 }
-            CameraView()
+            CameraView(image: $viewModel.currentFrame)
                 .tabItem {
                     Image(systemName: "camera.fill")
                     Text("Camera")
@@ -41,12 +42,13 @@ struct ContentView: View {
             self.messageText = ""
         }
 
-    
+
         // connecting to FastAPI locally
         let playerDetails = ["name": "Joe Lolley", "age": 18, "position": "LW"] as [String : Any]
         
         // sending HTTP POST request to FastAPI app running locally
         let url = URL(string: "http://127.0.0.1:8000/generate_tutorial/")!
+//        let url = URL(string: "http://10.0.0.129:8000/generate_tutorial/")!
         var request = URLRequest(url: url)
         
         // HTTP POST request to get tutorial from backend
@@ -95,11 +97,3 @@ struct ContentView_Previews: PreviewProvider {
             .previewDevice("iPhone 15 Pro Max")
     }
 }
-
-/*
-ContentView
- import SwiftUI
- 
-View_Chatbot
-
- */
