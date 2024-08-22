@@ -20,17 +20,14 @@ struct ContentView: View {
             ChatbotView(chatMessages: $chatMessages, sendMessage: sendMessage)
                 .tabItem() {
                     Image(systemName: "message.fill")
-                    Text("Chat")
                 }
             CameraView(image: $viewModel.currentFrame)
                 .tabItem {
                     Image(systemName: "camera.fill")
-                    Text("Camera")
                 }
             SettingsView()
                 .tabItem {
                     Image(systemName: "slider.horizontal.3")
-                    Text("Settings")
                 }
         }
         .accentColor(.green)
