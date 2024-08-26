@@ -1,5 +1,5 @@
 //
-//  DetailsView.swift
+//  PlayerDetailsFormView.swift
 //  Tekk
 //
 //  Created by Jordan on 8/26/24.
@@ -14,6 +14,7 @@ struct PlayerDetailsFormView: View {
     @State private var age = ""
     @State private var position = ""
     @State private var email = ""
+    @State private var password = ""
     @State private var isSubmitted = false
     @State private var errorMessage = ""
     
@@ -23,7 +24,6 @@ struct PlayerDetailsFormView: View {
         NavigationView {
             Form {
                 Section(header: Text("Player Information")) {
-                    // Binding the text fields to their respective state variables
                     TextField("First Name", text: $firstName)
                         .disableAutocorrection(true)
                     TextField("Last Name", text: $lastName)
@@ -39,6 +39,8 @@ struct PlayerDetailsFormView: View {
                         .keyboardType(.emailAddress)
                         .disableAutocorrection(true)
                         .autocapitalization(.none)
+                    TextField("Password", text: $password)
+                        .disableAutocorrection(true)
                 }
 
                 if !errorMessage.isEmpty {
@@ -50,6 +52,14 @@ struct PlayerDetailsFormView: View {
                     Text("Submit")
                 }
                 .disabled(isSubmitted)
+
+                // "Already have an account?" section
+                Section {
+                    NavigationLink(destination: LoginView()) {
+                        Text("Already have an account? Log in here")
+                            .foregroundColor(.blue)
+                    }
+                }
             }
             .navigationTitle("Player Details")
         }
@@ -66,7 +76,8 @@ struct PlayerDetailsFormView: View {
             "last_name": lastName,
             "age": ageInt,
             "position": position,
-            "email": email
+            "email": email,
+            "password": password
         ] as [String : Any]
 
         // sending HTTP POST request to FastAPI app running locally
@@ -107,6 +118,7 @@ struct PlayerDetailsFormView: View {
         task.resume()
     }
 }
+
 
 struct PlayerDetailsFormView_Previews: PreviewProvider {
     static var previews: some View {
