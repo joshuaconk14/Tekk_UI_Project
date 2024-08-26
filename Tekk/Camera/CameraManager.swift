@@ -116,7 +116,7 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
                        didOutput sampleBuffer: CMSampleBuffer,
                        from connection: AVCaptureConnection) {
         guard let currentFrame = sampleBuffer.cgImage else { return }
-        addToPreviewStream?(currentFrame)
+        addToPreviewStream?(currentFrame) 
     }
     
 }

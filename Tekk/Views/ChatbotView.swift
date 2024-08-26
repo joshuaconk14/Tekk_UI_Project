@@ -48,7 +48,7 @@ struct ChatbotView: View {
                                 .font(.system(size: 26))
                                 .foregroundColor(Color.green)
                         }
-}
+                    }
                     .padding()
                     
                     // Chat messages
