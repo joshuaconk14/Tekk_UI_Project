@@ -19,7 +19,7 @@ struct SettingsView: View {
                     profileHeader
                     
                     actionSection(title: "Account", buttons: [
-                        customActionButton(title: "Past Conversations", icon: "clock.fill"),
+                        customActionButton(title: "Favorite Conversations", icon: "heart.fill"),
                         customActionButton(title: "Share With a Friend", icon: "square.and.arrow.up.fill"),
                         customActionButton(title: "Edit your details", icon: "pencil")
                     ])
@@ -106,7 +106,7 @@ struct SettingsView: View {
     }
     
     private var deleteAccountButton: some View {
-        Button(action: {
+        Button(action: {    
             showDeleteConfirmation = true
         }) {
             Text("Delete Account")
