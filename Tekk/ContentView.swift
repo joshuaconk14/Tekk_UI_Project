@@ -9,14 +9,16 @@ import SwiftUI
 //import GoogleGenerativeAI
 
 struct ContentView: View {
+    @State private var isLoggedIn = false // Track if user is logged in
     @State private var isDetailsSubmitted = false // Track if details are submitted
+    @State private var token: String? = nil // Store the JWT token
     @State private var messageText = "" // Current text input from user
     @State var chatMessages: [Message_Struct] = [Message_Struct(role: "system", content: "Welcome to TekkAI")] // Stores list of chat messages
     @State private var viewModel = ViewModel()
 
     // main view
     var body: some View {
-        if isDetailsSubmitted {
+        if isDetailsSubmitted || isLoggedIn {
             TabView {
                 // chatMessages binded, sendMessage passed as closure
                 ChatbotView(chatMessages: $chatMessages, sendMessage: sendMessage)
@@ -34,7 +36,7 @@ struct ContentView: View {
             }
             .accentColor(.green)
         } else {
-            PlayerDetailsFormView(onDetailsSubmitted: {
+            PlayerDetailsFormView(isLoggedIn: $isLoggedIn, onDetailsSubmitted: {
                 self.isDetailsSubmitted = true
             })
         }

@@ -16,6 +16,7 @@ struct PlayerDetailsFormView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var isSubmitted = false
+    @Binding var isLoggedIn: Bool
     @State private var errorMessage = ""
     
     var onDetailsSubmitted: () -> Void // Closure to notify when details are submitted
@@ -55,7 +56,7 @@ struct PlayerDetailsFormView: View {
 
                 // "Already have an account?" section
                 Section {
-                    NavigationLink(destination: LoginView()) {
+                    NavigationLink(destination: LoginView(isLoggedIn: $isLoggedIn)) {
                         Text("Already have an account? Log in here")
                             .foregroundColor(.blue)
                     }
@@ -77,7 +78,7 @@ struct PlayerDetailsFormView: View {
             "age": ageInt,
             "position": position,
             "email": email,
-            "password": password
+            "hashed_password": password
         ] as [String : Any]
 
         // sending HTTP POST request to FastAPI app running locally
@@ -93,7 +94,7 @@ struct PlayerDetailsFormView: View {
 
         // Send JSON payload to backend through URL session
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let data = data, error == nil else {
+            guard let _ = data, error == nil else {
                 print("Error: \(error?.localizedDescription ?? "No data")")
                 DispatchQueue.main.async {
                     errorMessage = "Failed to submit details. Please try again."
@@ -120,8 +121,8 @@ struct PlayerDetailsFormView: View {
 }
 
 
-struct PlayerDetailsFormView_Previews: PreviewProvider {
-    static var previews: some View {
-        PlayerDetailsFormView(onDetailsSubmitted: {})
-    }
-}
+//struct PlayerDetailsFormView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        PlayerDetailsFormView(onDetailsSubmitted: {})
+//    }
+//}

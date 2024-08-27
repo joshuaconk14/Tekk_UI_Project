@@ -11,8 +11,8 @@ struct LoginView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var errorMessage = ""
-    @State private var isLoggedIn = false
-    
+    @Binding var isLoggedIn: Bool
+
     var body: some View {
         VStack {
             Text("Login")
@@ -105,8 +105,8 @@ struct LoginView: View {
 
 }
 
-struct LoginView_Previews: PreviewProvider {
-    static var previews: some View {
-        LoginView()
-    }
-}
+//struct LoginView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        LoginView()
+//    }
+//}
