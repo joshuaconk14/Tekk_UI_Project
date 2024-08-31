@@ -47,10 +47,6 @@ struct ContentView: View {
             chatMessages.append(Message_Struct(role: "user", content: "[USER]" + message))
             self.messageText = ""
         }
-
-
-        // connecting to FastAPI locally
-        let playerDetails = ["name": "Joe Lolley", "age": 18, "position": "LW"] as [String : Any]
         
         // sending HTTP POST request to FastAPI app running locally
         let url = URL(string: "http://127.0.0.1:8000/generate_tutorial/")!
@@ -61,10 +57,14 @@ struct ContentView: View {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
+        let selectedSessionID = "189917d0-7f9c-412d-847d-99a26ec0dd59"
+        let userID = 18
+        
         // ChatbotRequest model defined in backend
         let parameters: [String: Any] = [
+            "user_id": userID,
             "prompt": message,
-            "player_details": playerDetails
+            "session_id": selectedSessionID  // Include the current session ID
         ]
         
         // attempt to serialize the response
