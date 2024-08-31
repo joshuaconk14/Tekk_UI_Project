@@ -21,7 +21,6 @@ struct ChatbotView: View {
     @Binding var chatMessages: [Message_Struct]
     @Binding var userID: Int
     @State private var viewModel = ViewModel()
-
     
     var body: some View {
         GeometryReader { geometry in
@@ -103,7 +102,8 @@ struct ChatbotView: View {
                 
                 // Sliding chat history view
                 if isShowingHistory {
-                    ChatHistoryView(isShowingHistory: $isShowingHistory, selectedSessionID: $selectedSessionID)
+                    ChatHistoryView(isShowingHistory: $isShowingHistory, selectedSessionID: $selectedSessionID, userID: $userID
+                    )
                         .frame(width: geometry.size.width * 0.75)
                         .transition(.move(edge: .leading))
                         .zIndex(2)
@@ -215,13 +215,29 @@ struct ChatHistoryView: View {
     @Binding var userID: Int
     @State private var sessionIDs: [String] = []
     
-    @State private var sessionIDs: [String] = [
-        "TEKK",
-        "mini",
-        "4o",
-        "CO Landing page"
-    ]
+//    @State private var sessionIDs: [String] = [
+//        "TEKK",
+//        "mini",
+//        "4o",
+//        "CO Landing page"
+//    ]
     
+    func fetchUserSessions() {
+        let url = URL(string: "http://127.0.0.1:8000/user_sessions/\(userID)")!
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let data = data {
+                if let decodedResponse = try? JSONDecoder().decode([String].self, from: data) {
+                    DispatchQueue.main.async {
+                        self.sessionIDs = decodedResponse
+                    }
+                    return
+                }
+            }
+            print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+        }
+        .resume()
+    }
+
     var body: some View {
         VStack(alignment: .leading) {
             Text("Chat History")
@@ -257,10 +273,14 @@ struct ChatHistoryView: View {
             Spacer()
         }
         .background(Color.white)
+        .onAppear {
+            fetchUserSessions()
+        }
     }
 }
 
 #Preview {
     // Allow chatmessages to be accessed by parent ContentView
-    ChatbotView(chatMessages: .constant([Message_Struct(role: "assistant", content: "Welcome to TekkAI")]))
+    ChatbotView(chatMessages: .constant([Message_Struct(role: "assistant", content: "Welcome to TekkAI")]),
+                userID: .constant(0))
 }

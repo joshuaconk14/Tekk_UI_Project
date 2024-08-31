@@ -17,6 +17,7 @@ struct PlayerDetailsFormView: View {
     @State private var password = ""
     @State private var isSubmitted = false
     @Binding var isLoggedIn: Bool
+    @Binding var userID: Int
     @State private var errorMessage = ""
     
     var onDetailsSubmitted: () -> Void // Closure to notify when details are submitted
@@ -56,7 +57,7 @@ struct PlayerDetailsFormView: View {
 
                 // "Already have an account?" section
                 Section {
-                    NavigationLink(destination: LoginView(isLoggedIn: $isLoggedIn)) {
+                    NavigationLink(destination: LoginView(isLoggedIn: $isLoggedIn, userID: $userID)) {
                         Text("Already have an account? Log in here")
                             .foregroundColor(.blue)
                     }

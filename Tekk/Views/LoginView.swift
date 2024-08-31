@@ -12,6 +12,7 @@ struct LoginView: View {
     @State private var password = ""
     @State private var errorMessage = ""
     @Binding var isLoggedIn: Bool
+    @Binding var userID: Int
 
     var body: some View {
         VStack {
@@ -85,12 +86,13 @@ struct LoginView: View {
             if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
                 // Handle JWT token here
                 if let responseObject = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let token = responseObject["access_token"] as? String {
-                    // Save the token or use it as needed
+                   let token = responseObject["access_token"] as? String,
+                   let userId = responseObject["user_id"] as? Int {
                     DispatchQueue.main.async {
-                        isLoggedIn = true
+                        self.userID = userId
+                        self.isLoggedIn = true
                         errorMessage = ""
-                        print("Logged in with token: \(token)")
+                        print("Logged in with token: \(token) and user ID: \(userId)")
                     }
                 }
             } else {
