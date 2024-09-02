@@ -20,6 +20,12 @@ struct TutorialResponse: Codable {
     let session_id: String
 }
 
+struct Conversation: Identifiable, Codable {
+    let id: String
+    let title: String
+    // Add other relevant fields
+}
+
 // Main chatbot view of the app
 struct ChatbotView: View {
     @State private var isShowingHistory = false
