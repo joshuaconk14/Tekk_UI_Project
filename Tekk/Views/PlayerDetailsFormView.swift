@@ -1,5 +1,5 @@
 //
-//  DetailsView.swift
+//  PlayerDetailsFormView.swift
 //  Tekk
 //
 //  Created by Jordan on 8/26/24.
@@ -14,8 +14,11 @@ struct PlayerDetailsFormView: View {
     @State private var age = ""
     @State private var position = ""
     @State private var email = ""
+    @State private var password = ""
     @State private var isSubmitted = false
+    @Binding var isLoggedIn: Bool
     @State private var errorMessage = ""
+    @State private var authToken = ""
     
     var onDetailsSubmitted: () -> Void // Closure to notify when details are submitted
 
@@ -23,7 +26,6 @@ struct PlayerDetailsFormView: View {
         NavigationView {
             Form {
                 Section(header: Text("Player Information")) {
-                    // Binding the text fields to their respective state variables
                     TextField("First Name", text: $firstName)
                         .disableAutocorrection(true)
                     TextField("Last Name", text: $lastName)
@@ -39,6 +41,8 @@ struct PlayerDetailsFormView: View {
                         .keyboardType(.emailAddress)
                         .disableAutocorrection(true)
                         .autocapitalization(.none)
+                    TextField("Password", text: $password)
+                        .disableAutocorrection(true)
                 }
 
                 if !errorMessage.isEmpty {
@@ -50,23 +54,32 @@ struct PlayerDetailsFormView: View {
                     Text("Submit")
                 }
                 .disabled(isSubmitted)
+
+                // "Already have an account?" section
+                Section {
+                    NavigationLink(destination: LoginView(isLoggedIn: $isLoggedIn, authToken: $authToken)) {
+                        Text("Already have an account? Log in here")
+                            .foregroundColor(.blue)
+                    }
+                }
             }
             .navigationTitle("Player Details")
         }
     }
 
     func submitDetails() {
-        guard let ageInt = Int(age), !firstName.isEmpty, !lastName.isEmpty, !position.isEmpty, !email.isEmpty else {
+        guard let ageInt = Int(age), !firstName.isEmpty, !lastName.isEmpty, !position.isEmpty, !email.isEmpty, !password.isEmpty else {
             errorMessage = "Please fill in all fields correctly."
             return
         }
 
-        let playerDetails = [
+        let playerInfo = [
             "first_name": firstName,
             "last_name": lastName,
             "age": ageInt,
             "position": position,
-            "email": email
+            "email": email,
+            "password": password
         ] as [String : Any]
 
         // sending HTTP POST request to FastAPI app running locally
@@ -78,38 +91,57 @@ struct PlayerDetailsFormView: View {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         // attempt to serialize the response
-        request.httpBody = try? JSONSerialization.data(withJSONObject: playerDetails, options: [])
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: playerInfo)
+        } catch {
+            print("Error serializing player details: \(error)")
+            errorMessage = "Failed to prepare registration data."
+            return
+        }
 
         // Send JSON payload to backend through URL session
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let data = data, error == nil else {
-                print("Error: \(error?.localizedDescription ?? "No data")")
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Network error: \(error.localizedDescription)")
                 DispatchQueue.main.async {
-                    errorMessage = "Failed to submit details. Please try again."
+                    self.errorMessage = "Network error. Please try again."
+                }
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("Invalid response")
+                DispatchQueue.main.async {
+                    self.errorMessage = "Invalid server response."
                 }
                 return
             }
 
             // If valid URL response, return status code 200 and proceed
-            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+            print("Status code: \(httpResponse.statusCode)")
+
+            if let data = data, let responseString = String(data: data, encoding: .utf8) {
+                print("Response data: \(responseString)")
+            }
+
+            if httpResponse.statusCode == 200 {
                 DispatchQueue.main.async {
-                    isSubmitted = true
-                    errorMessage = ""
-                    onDetailsSubmitted() // Notify that details are submitted
+                    self.isSubmitted = true
+                    self.errorMessage = ""
+                    self.onDetailsSubmitted()
                 }
             } else {
                 DispatchQueue.main.async {
-                    errorMessage = "Failed to submit details. Please try again."
+                    self.errorMessage = "Failed to submit details. Please try again. (Status: \(httpResponse.statusCode))"
                 }
             }
-        }
-
-        task.resume()
+        }.resume()
     }
 }
 
-struct PlayerDetailsFormView_Previews: PreviewProvider {
-    static var previews: some View {
-        PlayerDetailsFormView(onDetailsSubmitted: {})
-    }
-}
+
+//struct PlayerDetailsFormView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        PlayerDetailsFormView(onDetailsSubmitted: {})
+//    }
+//}
