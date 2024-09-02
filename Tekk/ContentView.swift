@@ -10,18 +10,20 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var isLoggedIn = false // Track if user is logged in
-    @State private var isDetailsSubmitted = false // Track if details are submitted
+    // @State private var isDetailsSubmitted = false // Track if details are submitted
     @State private var token: String? = nil // Store the JWT token
-    @State private var userID: Int = 0
     @State private var messageText = "" // Current text input from user
+    @State private var authToken = ""
     @State var chatMessages: [Message_Struct] = [Message_Struct(role: "system", content: "Welcome to TekkAI")] // Stores list of chat messages
     @State private var viewModel = ViewModel()
 
-    // main view
+    // Main parent view
     var body: some View {
-        if isDetailsSubmitted || isLoggedIn {
+        // if isDetailsSubmitted || isLoggedIn {
+        if isLoggedIn {
             TabView {
-                ChatbotView(chatMessages: $chatMessages, userID: $userID)
+                // Main views of app
+                ChatbotView(chatMessages: $chatMessages, authToken: $authToken)
                     .tabItem {
                         Image(systemName: "message.fill")
                     }
@@ -36,8 +38,8 @@ struct ContentView: View {
             }
             .accentColor(.green)
         } else {
-            PlayerDetailsFormView(isLoggedIn: $isLoggedIn, userID: $userID, onDetailsSubmitted: {
-                self.isDetailsSubmitted = true
+            PlayerDetailsFormView(isLoggedIn: $isLoggedIn, onDetailsSubmitted: {
+                self.isLoggedIn = true
             })
         }
     }

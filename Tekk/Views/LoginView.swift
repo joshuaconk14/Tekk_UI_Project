@@ -7,12 +7,18 @@
 
 import SwiftUI
 
+// expected response structure from backend after POST request to login endpoint
+struct LoginResponse: Codable {
+    let access_token: String
+    let token_type: String
+}
+
 struct LoginView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var errorMessage = ""
     @Binding var isLoggedIn: Bool
-    @Binding var userID: Int
+    @Binding var authToken: String
 
     var body: some View {
         VStack {
@@ -59,52 +65,43 @@ struct LoginView: View {
         let loginDetails = [
             "email": email,
             "password": password
-        ] as [String : Any]
+        ]
 
         // sending HTTP POST request to FastAPI app running locally
         let url = URL(string: "http://127.0.0.1:8000/login/")!
         var request = URLRequest(url: url)
 
+        print("current token: \(authToken)")
         // HTTP POST request to login user and receive JWT token
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try? JSONSerialization.data(withJSONObject: loginDetails)
 
-        // attempt to serialize the response
-        request.httpBody = try? JSONSerialization.data(withJSONObject: loginDetails, options: [])
-
-        // Send JSON payload to backend through URL session
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let data = data, error == nil else {
-                print("Error: \(error?.localizedDescription ?? "No data")")
+        // start URL session to interact with backend
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data,
+               let decodedResponse = try? JSONDecoder().decode(LoginResponse.self, from: data) {
                 DispatchQueue.main.async {
-                    errorMessage = "Failed to login. Please try again."
-                }
-                return
-            }
-
-            // If valid URL response, return status code 200 and proceed
-            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-                // Handle JWT token here
-                if let responseObject = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let token = responseObject["access_token"] as? String,
-                   let userId = responseObject["user_id"] as? Int {
-                    DispatchQueue.main.async {
-                        self.userID = userId
-                        self.isLoggedIn = true
-                        errorMessage = ""
-                        print("Logged in with token: \(token) and user ID: \(userId)")
-                    }
+                    self.authToken = decodedResponse.access_token
+                    self.isLoggedIn = true
+                    print("Login token: \(self.authToken)")
+                    print("Login success: \(self.isLoggedIn)")
+                    // TODO make this a secure key
+                    UserDefaults.standard.set(self.authToken, forKey: "authToken")
                 }
             } else {
                 DispatchQueue.main.async {
-                    errorMessage = "Failed to login. Please try again."
+                    self.errorMessage = "Failed to login. Please try again."
+                    if let error = error {
+                        print("Login error: \(error.localizedDescription)")
+                    }
+                    if let data = data, let responseString = String(data: data, encoding: .utf8) {
+                        print("Response data: \(responseString)")
+                    }
                 }
             }
-        }
-
-        task.resume()
+        }.resume()
     }
-
 }
 
 //struct LoginView_Previews: PreviewProvider {

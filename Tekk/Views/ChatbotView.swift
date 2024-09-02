@@ -7,10 +7,17 @@
 
 import SwiftUI
 
+// structure for chat messages
 struct Message_Struct: Identifiable {
     let id = UUID()
     let role: String
     var content: String
+}
+
+// expected response structure from backend after POST request to generate_tutorial endpoint
+struct TutorialResponse: Codable {
+    let tutorial: String
+    let session_id: String
 }
 
 // Main chatbot view of the app
@@ -19,7 +26,7 @@ struct ChatbotView: View {
     @State private var selectedSessionID = ""
     @State private var messageText = ""
     @Binding var chatMessages: [Message_Struct]
-    @Binding var userID: Int
+    @Binding var authToken: String
     @State private var viewModel = ViewModel()
     
     var body: some View {
@@ -102,12 +109,12 @@ struct ChatbotView: View {
                 
                 // Sliding chat history view
                 if isShowingHistory {
-                    ChatHistoryView(isShowingHistory: $isShowingHistory, selectedSessionID: $selectedSessionID, userID: $userID
+                    ChatHistoryView(isShowingHistory: $isShowingHistory, selectedSessionID: $selectedSessionID
                     )
                         .frame(width: geometry.size.width * 0.75)
                         .transition(.move(edge: .leading))
-                        .zIndex(2)
-                }
+                            .zIndex(2)
+                    }
             }
         }
     }
@@ -123,46 +130,57 @@ struct ChatbotView: View {
         // let url = URL(string: "http://10.0.0.129:8000/generate_tutorial/")!
         var request = URLRequest(url: url)
         
+        // TODO make this a secure key
+        let authToken = UserDefaults.standard.string(forKey: "authToken") ?? ""
+        print("Token in ChatbotView: \(authToken)")
+        
         // HTTP POST request to get tutorial from backend
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
         
-//        let selectedSessionID = "189917d0-7f9c-412d-847d-99a26ec0dd59"
-//        let userID = 18
+    //    let selectedSessionID = "189917d0-7f9c-412d-847d-99a26ec0dd59"
+    //    let userID = 18
         
         // ChatbotRequest model defined in backend
         let parameters: [String: Any] = [
-            "user_id": userID,
+        //    "user_id": userID,
             "prompt": message,
-            "session_id": selectedSessionID  // Include the current session ID
+           "session_id": selectedSessionID  // Include the current session ID
         ]
-        
-        // attempt to serialize the response
-        request.httpBody = try? JSONSerialization.data(withJSONObject: parameters, options: [])
-        
-        // Send JSON payload to backend through URL session
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let data = data, error == nil else {
-                print("Error: \(error?.localizedDescription ?? "No data")")
+
+        request.httpBody = try? JSONSerialization.data(withJSONObject: parameters)
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error: \(error.localizedDescription)")
                 return
             }
             
-            // If valid URL response, return status code 200 and proceed
-            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-                // try to parse json response and extract tutorial string
-                if let responseObject = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let tutorial = responseObject["tutorial"] as? String {
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("Invalid response")
+                return
+            }
+            
+            print("Status code: \(httpResponse.statusCode)")
+            
+            if let data = data {
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("Response data: \(responseString)")
+                }
+                
+                if let decodedResponse = try? JSONDecoder().decode(TutorialResponse.self, from: data) {
                     DispatchQueue.main.async {
-                        self.chatMessages.append(Message_Struct(role: "assistant", content: tutorial))
+                        self.chatMessages.append(Message_Struct(role: "assistant", content: decodedResponse.tutorial))
+                        self.selectedSessionID = decodedResponse.session_id
                     }
+                } else {
+                    print("Failed to decode response")
                 }
             } else {
-                print("HTTP Response: \(response.debugDescription)")
+                print("No data received")
             }
-        }
-        
-        task.resume()
-        
+        }.resume()
     }
     
     // Function to start a new conversation
@@ -212,7 +230,6 @@ struct MessageView: View {
 struct ChatHistoryView: View {
     @Binding var isShowingHistory: Bool
     @Binding var selectedSessionID: String
-    @Binding var userID: Int
     @State private var sessionIDs: [String] = []
     
 //    @State private var sessionIDs: [String] = [
@@ -222,21 +239,21 @@ struct ChatHistoryView: View {
 //        "CO Landing page"
 //    ]
     
-    func fetchUserSessions() {
-        let url = URL(string: "http://127.0.0.1:8000/user_sessions/\(userID)")!
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            if let data = data {
-                if let decodedResponse = try? JSONDecoder().decode([String].self, from: data) {
-                    DispatchQueue.main.async {
-                        self.sessionIDs = decodedResponse
-                    }
-                    return
-                }
-            }
-            print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
-        }
-        .resume()
-    }
+//    func fetchUserSessions() {
+//        let url = URL(string: "http://127.0.0.1:8000/user_sessions/\(userID)")!
+//        URLSession.shared.dataTask(with: url) { data, response, error in
+//            if let data = data {
+//                if let decodedResponse = try? JSONDecoder().decode([String].self, from: data) {
+//                    DispatchQueue.main.async {
+//                        self.sessionIDs = decodedResponse
+//                    }
+//                    return
+//                }
+//            }
+//            print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+//        }
+//        .resume()
+//    }
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -273,14 +290,13 @@ struct ChatHistoryView: View {
             Spacer()
         }
         .background(Color.white)
-        .onAppear {
-            fetchUserSessions()
-        }
+//        .onAppear {
+//            fetchUserSessions()
+//        }
     }
 }
 
-#Preview {
-    // Allow chatmessages to be accessed by parent ContentView
-    ChatbotView(chatMessages: .constant([Message_Struct(role: "assistant", content: "Welcome to TekkAI")]),
-                userID: .constant(0))
-}
+//#Preview {
+//    // Allow chatmessages to be accessed by parent ContentView
+//    ChatbotView(chatMessages: .constant([Message_Struct(role: "assistant", content: "Welcome to TekkAI")]))
+//}
