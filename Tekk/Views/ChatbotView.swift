@@ -18,12 +18,13 @@ struct Message_Struct: Identifiable {
 struct TutorialResponse: Codable {
     let tutorial: String
     let session_id: String
+    // let created_at: String
 }
 
 struct Conversation: Identifiable, Codable {
     let id: String
-    let title: String
-    // Add other relevant fields
+    var title: String
+    let createdAt: Date
 }
 
 // Main chatbot view of the app
@@ -34,6 +35,7 @@ struct ChatbotView: View {
     @Binding var chatMessages: [Message_Struct]
     @Binding var authToken: String
     @State private var viewModel = ViewModel()
+    @State private var conversations: [Conversation] = []
     
     var body: some View {
         GeometryReader { geometry in
@@ -113,12 +115,13 @@ struct ChatbotView: View {
                 
                 // Sliding chat history view
                 if isShowingHistory {
-                    ChatHistoryView(isShowingHistory: $isShowingHistory, selectedSessionID: $selectedSessionID
-                    )
-                        .frame(width: geometry.size.width * 0.75)
-                        .transition(.move(edge: .leading))
-                            .zIndex(2)
-                    }
+                    ChatHistoryView(isShowingHistory: $isShowingHistory, 
+                                    selectedSessionID: $selectedSessionID,
+                                    conversations: $conversations)
+                    .frame(width: geometry.size.width * 0.75)
+                    .transition(.move(edge: .leading))
+                    .zIndex(2)  
+                }
             }
         }
     }
@@ -129,30 +132,19 @@ struct ChatbotView: View {
             self.messageText = ""
         }
         
-        // sending HTTP POST request to FastAPI app running locally
         let url = URL(string: "http://127.0.0.1:8000/generate_tutorial/")!
-        // let url = URL(string: "http://10.0.0.129:8000/generate_tutorial/")!
         var request = URLRequest(url: url)
         
-        // TODO make this a secure key
-        let authToken = UserDefaults.standard.string(forKey: "authToken") ?? ""
-        print("Token in ChatbotView: \(authToken)")
+        let storedToken = UserDefaults.standard.string(forKey: "authToken") ?? ""
+        print("Token in ChatbotView: \(storedToken)")
         
-        // HTTP POST request to get tutorial from backend
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        // request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
-        let storedToken = UserDefaults.standard.string(forKey: "authToken") ?? ""
         request.setValue("Bearer \(storedToken)", forHTTPHeaderField: "Authorization")
         
-    //    let selectedSessionID = "189917d0-7f9c-412d-847d-99a26ec0dd59"
-    //    let userID = 18
-        
-        // ChatbotRequest model defined in backend
         let parameters: [String: Any] = [
-        //    "user_id": userID,
             "prompt": message,
-           "session_id": selectedSessionID  // Include the current session ID
+            "session_id": selectedSessionID
         ]
 
         request.httpBody = try? JSONSerialization.data(withJSONObject: parameters)
@@ -175,18 +167,28 @@ struct ChatbotView: View {
                     print("Response data: \(responseString)")
                 }
                 
-                if let decodedResponse = try? JSONDecoder().decode(TutorialResponse.self, from: data) {
+                do {
+                    let decodedResponse = try JSONDecoder().decode(TutorialResponse.self, from: data)
                     DispatchQueue.main.async {
                         self.chatMessages.append(Message_Struct(role: "assistant", content: decodedResponse.tutorial))
                         self.selectedSessionID = decodedResponse.session_id
+                        
+                        // Update the conversation title if it's a new conversation
+                        if let index = self.conversations.firstIndex(where: { $0.id == decodedResponse.session_id }) {
+                            self.conversations[index].title = message
+                        } else {
+                            let newConversation = Conversation(id: decodedResponse.session_id, title: message, createdAt: Date())
+                            self.conversations.insert(newConversation, at: 0)
+                        }
                     }
-                } else {
-                    print("Failed to decode response")
+                } catch {
+                    print("Failed to decode response: \(error)")
                 }
             } else {
                 print("No data received")
             }
-        }.resume()
+        }
+        .resume()
     }
     
     func loadConversations() {
@@ -227,6 +229,8 @@ struct ChatbotView: View {
                     DispatchQueue.main.async {
                         self.selectedSessionID = newSessionId
                         self.chatMessages = [Message_Struct(role: "system", content: "Welcome to TekkAI")]
+                        let newConversation = Conversation(id: newSessionId, title: "New Conversation", createdAt: Date())
+                        self.conversations.insert(newConversation, at: 0)
                         print("New conversation started with session ID: \(newSessionId)")
                     }
                 }
@@ -275,31 +279,8 @@ struct MessageView: View {
 struct ChatHistoryView: View {
     @Binding var isShowingHistory: Bool
     @Binding var selectedSessionID: String
-    @State private var sessionIDs: [String] = []
+    @Binding var conversations: [Conversation]
     
-//    @State private var sessionIDs: [String] = [
-//        "TEKK",
-//        "mini",
-//        "4o",
-//        "CO Landing page"
-//    ]
-    
-//    func fetchUserSessions() {
-//        let url = URL(string: "http://127.0.0.1:8000/user_sessions/\(userID)")!
-//        URLSession.shared.dataTask(with: url) { data, response, error in
-//            if let data = data {
-//                if let decodedResponse = try? JSONDecoder().decode([String].self, from: data) {
-//                    DispatchQueue.main.async {
-//                        self.sessionIDs = decodedResponse
-//                    }
-//                    return
-//                }
-//            }
-//            print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
-//        }
-//        .resume()
-//    }
-
     var body: some View {
         VStack(alignment: .leading) {
             Text("Chat History")
@@ -309,19 +290,23 @@ struct ChatHistoryView: View {
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
-                    ForEach(sessionIDs, id: \.self) { sessionID in
+                    ForEach(conversations) { conversation in
                         Button(action: {
-                            selectedSessionID = sessionID
+                            selectedSessionID = conversation.id
                             withAnimation(.spring()) {
                                 isShowingHistory = false
                             }
                         }) {
                             HStack {
-                                Text(sessionID)
+                                Text(conversation.title)
                                     .foregroundColor(.primary)
                                     .padding(.leading, 10)
                                 
-                                Spacer() // Pushes content to the left
+                                Spacer()
+                                
+                                Text(conversation.createdAt, style: .date)
+                                    .foregroundColor(.secondary)
+                                    .font(.caption)
                             }
                             .padding()
                             .background(Color.gray.opacity(0.1))
@@ -335,9 +320,6 @@ struct ChatHistoryView: View {
             Spacer()
         }
         .background(Color.white)
-//        .onAppear {
-//            fetchUserSessions()
-//        }
     }
 }
 
