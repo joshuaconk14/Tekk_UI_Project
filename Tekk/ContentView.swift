@@ -10,7 +10,6 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var isLoggedIn = false // Track if user is logged in
-    // @State private var isDetailsSubmitted = false // Track if details are submitted
     @State private var token: String? = nil // Store the JWT token
     @State private var messageText = "" // Current text input from user
     @State private var authToken = ""
@@ -19,7 +18,6 @@ struct ContentView: View {
 
     // Main parent view
     var body: some View {
-        // if isDetailsSubmitted || isLoggedIn {
         if isLoggedIn {
             TabView {
                 // Main views of app

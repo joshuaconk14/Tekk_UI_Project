@@ -55,9 +55,7 @@ struct ChatbotView: View {
                             .font(.largeTitle)
                             .bold()
                         
-                        Button(action: {
-                            startNewConversation()
-                        }) {
+                        Button(action: startNewConversation) {
                             Image(systemName: "bubble.left.fill")
                                 .font(.system(size: 26))
                                 .foregroundColor(Color.green)
@@ -143,7 +141,9 @@ struct ChatbotView: View {
         // HTTP POST request to get tutorial from backend
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
+        // request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
+        let storedToken = UserDefaults.standard.string(forKey: "authToken") ?? ""
+        request.setValue("Bearer \(storedToken)", forHTTPHeaderField: "Authorization")
         
     //    let selectedSessionID = "189917d0-7f9c-412d-847d-99a26ec0dd59"
     //    let userID = 18
@@ -189,13 +189,52 @@ struct ChatbotView: View {
         }.resume()
     }
     
-    // Function to start a new conversation
-    private func startNewConversation() {
-        chatMessages.removeAll { message in
-            message.content != "Welcome to TekkAI"
+    func loadConversations() {
+        // API call to fetch user's conversations
+        // Update the `conversations` state variable
+    }
+
+    func loadConversation(_ id: String) {
+        // API call to fetch specific conversation
+        // Update the `chatMessages` and `currentConversationId` state variables
+    }
+
+    func startNewConversation() {
+        let url = URL(string: "http://127.0.0.1:8000/conversations/new")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        // request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
+        let storedToken = UserDefaults.standard.string(forKey: "authToken") ?? ""
+        request.setValue("Bearer \(storedToken)", forHTTPHeaderField: "Authorization")
+
+        print("Starting new conversation with auth token: \(storedToken)")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error creating new conversation: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let data = data else {
+                print("No data received when creating new conversation")
+                return
+            }
+            
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                let newSessionId = json["session_id"] as? String {
+                    DispatchQueue.main.async {
+                        self.selectedSessionID = newSessionId
+                        self.chatMessages = [Message_Struct(role: "system", content: "Welcome to TekkAI")]
+                        print("New conversation started with session ID: \(newSessionId)")
+                    }
+                }
+            } catch {
+                print("Error parsing new conversation response: \(error.localizedDescription)")
+            }
         }
-        // TODO: generate new session id
-        // selectedSessionID = generateNewSessionID()
+        .resume()
     }
 }
 

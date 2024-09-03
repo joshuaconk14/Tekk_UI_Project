@@ -88,6 +88,9 @@ struct LoginView: View {
                     print("Login success: \(self.isLoggedIn)")
                     // TODO make this a secure key
                     UserDefaults.standard.set(self.authToken, forKey: "authToken")
+
+                    // Fetch conversations after successful login
+                    self.fetchConversations()
                 }
             } else {
                 DispatchQueue.main.async {
@@ -102,6 +105,12 @@ struct LoginView: View {
             }
         }.resume()
     }
+
+    func fetchConversations() {
+    // API call to fetch user's conversations
+    // Store them in UserDefaults or pass them to ContentView
+    }
+
 }
 
 //struct LoginView_Previews: PreviewProvider {
