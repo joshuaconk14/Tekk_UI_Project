@@ -7,6 +7,18 @@
 
 import SwiftUI
 
+// expected response structure from backend after GET request to conversations/<id> endpoint
+struct ConversationResponse: Codable {
+    let id: String
+    let messages: [APIMessage]
+}
+
+// structure for messages in a conversation
+struct APIMessage: Codable {
+    let role: String
+    let content: String
+}
+
 // structure for chat messages
 struct Message_Struct: Identifiable {
     let id = UUID()
@@ -21,6 +33,7 @@ struct TutorialResponse: Codable {
     // let created_at: String
 }
 
+// structure for a conversation
 struct Conversation: Identifiable, Codable {
     let id: String
     var title: String
@@ -35,7 +48,7 @@ struct ChatbotView: View {
     @Binding var chatMessages: [Message_Struct]
     @Binding var authToken: String
     @State private var viewModel = ViewModel()
-    @State private var conversations: [Conversation] = []
+    @Binding var conversations: [Conversation]
     
     var body: some View {
         GeometryReader { geometry in
@@ -117,7 +130,8 @@ struct ChatbotView: View {
                 if isShowingHistory {
                     ChatHistoryView(isShowingHistory: $isShowingHistory, 
                                     selectedSessionID: $selectedSessionID,
-                                    conversations: $conversations)
+                                    conversations: $conversations,
+                                    loadConversation: loadConversation)
                     .frame(width: geometry.size.width * 0.75)
                     .transition(.move(edge: .leading))
                     .zIndex(2)  
@@ -190,18 +204,43 @@ struct ChatbotView: View {
         }
         .resume()
     }
-    
-    func loadConversations() {
-        // API call to fetch user's conversations
-        // Update the `conversations` state variable
-    }
 
     func loadConversation(_ id: String) {
-        // API call to fetch specific conversation
-        // Update the `chatMessages` and `currentConversationId` state variables
+        let url = URL(string: "http://127.0.0.1:8000/conversations/\(id)")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        let storedToken = UserDefaults.standard.string(forKey: "authToken") ?? ""
+        request.setValue("Bearer \(storedToken)", forHTTPHeaderField: "Authorization")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error loading conversation: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let data = data else {
+                print("No data received when loading conversation")
+                return
+            }
+            
+            do {
+                let decodedResponse = try JSONDecoder().decode(ConversationResponse.self, from: data)
+                DispatchQueue.main.async {
+                self.chatMessages = [Message_Struct(role: "system", content: "Welcome to TekkAI")]
+                self.chatMessages += decodedResponse.messages.map { message in
+                    Message_Struct(role: message.role, content: message.role == "user" ? "[USER]" + message.content : message.content)
+                }
+                self.selectedSessionID = id
+            }
+            } catch {
+                print("Error parsing conversation response: \(error.localizedDescription)")
+            }
+        }
+        .resume()
     }
 
     func startNewConversation() {
+        // API call to start a new conversation
         let url = URL(string: "http://127.0.0.1:8000/conversations/new")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -240,6 +279,37 @@ struct ChatbotView: View {
         }
         .resume()
     }
+
+    func fetchConversations() {
+        let url = URL(string: "http://127.0.0.1:8000/conversations/")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        let storedToken = UserDefaults.standard.string(forKey: "authToken") ?? ""
+        request.setValue("Bearer \(storedToken)", forHTTPHeaderField: "Authorization")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error fetching conversations: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let data = data else {
+                print("No data received when fetching conversations")
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .iso8601
+                let response = try decoder.decode([Conversation].self, from: data)
+                DispatchQueue.main.async {
+                    self.conversations = response
+                }
+            } catch {
+                print("Error parsing conversations response: \(error.localizedDescription)")
+            }
+        }.resume()
+    }
 }
 
 // The messages in the chatbot corresponding to if message is from user or AI
@@ -247,22 +317,17 @@ struct MessageView: View {
     let message: Message_Struct
     
     var body: some View {
-        // User message
-        if message.content.contains("[USER]") {
-            let newMessage = message.content.replacingOccurrences(of: "[USER]", with: "")
-            HStack {
+        HStack {
+            if message.role == "user" {
                 Spacer()
-                Text(newMessage)
+                Text(message.content.replacingOccurrences(of: "[USER]", with: ""))
                     .padding()
                     .foregroundColor(.white)
                     .background(.green.opacity(0.8))
                     .cornerRadius(10)
                     .padding(.horizontal, 16)
                     .padding(.bottom, 10)
-            }
-        // System message
-        } else {
-            HStack {
+            } else {
                 Text(message.content)
                     .padding()
                     .background(.gray.opacity(0.15))
@@ -280,6 +345,7 @@ struct ChatHistoryView: View {
     @Binding var isShowingHistory: Bool
     @Binding var selectedSessionID: String
     @Binding var conversations: [Conversation]
+    var loadConversation: (String) -> Void
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -292,7 +358,7 @@ struct ChatHistoryView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     ForEach(conversations) { conversation in
                         Button(action: {
-                            selectedSessionID = conversation.id
+                            loadConversation(conversation.id)
                             withAnimation(.spring()) {
                                 isShowingHistory = false
                             }

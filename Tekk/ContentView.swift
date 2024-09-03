@@ -15,14 +15,14 @@ struct ContentView: View {
     @State private var authToken = ""
     @State var chatMessages: [Message_Struct] = [Message_Struct(role: "system", content: "Welcome to TekkAI")] // Stores list of chat messages
     @State private var viewModel = ViewModel()
+    @State private var conversations: [Conversation] = []
 
     // Main parent view
     var body: some View {
         if isLoggedIn {
             TabView {
                 // Main views of app
-                ChatbotView(chatMessages: $chatMessages, authToken: $authToken)
-                    .tabItem {
+                ChatbotView(chatMessages: $chatMessages, authToken: $authToken, conversations: $conversations)                    .tabItem {
                         Image(systemName: "message.fill")
                     }
                 CameraView(image: $viewModel.currentFrame)
