@@ -111,36 +111,6 @@ struct LoginView: View {
         }.resume()
     }
 
-    // func fetchConversations() {
-    //     let url = URL(string: "http://127.0.0.1:8000/get_conversation_history")!
-    //     var request = URLRequest(url: url)
-    //     request.httpMethod = "GET"
-    //     request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
-
-    //     URLSession.shared.dataTask(with: request) { data, response, error in
-    //         if let error = error {
-    //             print("Error fetching conversations: \(error.localizedDescription)")
-    //             return
-    //         }
-            
-    //         guard let data = data else {
-    //             print("No data received when fetching conversations")
-    //             return
-    //         }
-            
-    //         do {
-    //             let decoder = JSONDecoder()
-    //             decoder.dateDecodingStrategy = .iso8601
-    //             let response = try decoder.decode(ConversationsResponse.self, from: data)
-    //             DispatchQueue.main.async {
-    //                 self.conversations = response.conversations
-    //             }
-    //         } catch {
-    //             print("Error parsing conversations response: \(error.localizedDescription)")
-    //         }
-    //     }.resume()
-    // }
-
 }
 
 //struct LoginView_Previews: PreviewProvider {

@@ -13,7 +13,7 @@ struct ConversationResponse: Codable {
     let messages: [APIMessage]
 }
 
-// expected response structure from backend after GET request to get_conversation_history endpoint
+// expected response structure from backend after GET request to get_previous_conversations endpoint
 struct PreviousConversationsResponse: Codable {
     let conversations: [Conversation]
 }
@@ -296,7 +296,7 @@ struct ChatbotView: View {
 
     // TODO: use for when user logs into the app
     func fetchConversations() {
-        let url = URL(string: "http://127.0.0.1:8000/get_conversation_history/")!
+        let url = URL(string: "http://127.0.0.1:8000/get_previous_conversations/")!
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         let storedToken = UserDefaults.standard.string(forKey: "authToken") ?? ""
