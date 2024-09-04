@@ -107,7 +107,8 @@ struct ChatbotView: View {
                                     selectedSessionID: $selectedSessionID,
                                     conversations: $conversations,
                                     loadConversation: loadConversation,
-                                    fetchConversations: fetchConversations)
+                                    fetchConversations: fetchConversations,
+                                    deleteConversation: deleteConversation) 
                     .frame(width: geometry.size.width * 0.75)
                     .transition(.move(edge: .leading))
                     .zIndex(2)  
@@ -310,6 +311,36 @@ struct ChatbotView: View {
             }
         }.resume()
     }
+
+    // API call to delete a conversation
+    func deleteConversation(_ id: String) {
+        let url = URL(string: "http://127.0.0.1:8000/conversations/\(id)")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        let storedToken = UserDefaults.standard.string(forKey: "authToken") ?? ""
+        request.setValue("Bearer \(storedToken)", forHTTPHeaderField: "Authorization")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error deleting conversation: \(error.localizedDescription)")
+                return
+            }
+            
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                DispatchQueue.main.async {
+                    if let index = self.conversations.firstIndex(where: { $0.id == id }) {
+                        self.conversations.remove(at: index)
+                    }
+                    if self.selectedSessionID == id {
+                        self.chatMessages = [Message_Struct(role: "system", content: "Welcome to TekkAI")]
+                        self.selectedSessionID = ""
+                    }
+                }
+            } else {
+                print("Failed to delete conversation")
+            }
+        }.resume()
+    }
 }
 
 // The messages in the chatbot corresponding to if message is from user or AI
@@ -346,8 +377,11 @@ struct ChatHistoryView: View {
     @Binding var selectedSessionID: String
     @Binding var conversations: [Conversation]
     var loadConversation: (String) -> Void
-    var fetchConversations: () -> Void  // Add this line
-    
+    var fetchConversations: () -> Void
+    var deleteConversation: (String) -> Void
+    @State private var showingDeleteConfirmation = false
+    @State private var conversationToDelete: Conversation?
+
     var body: some View {
         VStack(alignment: .leading) {
             Text("Chat History")
@@ -363,27 +397,38 @@ struct ChatHistoryView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 10) {
                         ForEach(conversations) { conversation in
-                            Button(action: {
-                                loadConversation(conversation.id)
-                                withAnimation(.spring()) {
-                                    isShowingHistory = false
+                            HStack {
+                                Button(action: {
+                                    loadConversation(conversation.id)
+                                    withAnimation(.spring()) {
+                                        isShowingHistory = false
+                                    }
+                                }) {
+                                    HStack {
+                                        Text(conversation.title)
+                                            .foregroundColor(.primary)
+                                            .padding(.leading, 10)
+                                        
+                                        Spacer()
+                                        
+                                        Text(conversation.createdAt, style: .date)
+                                            .foregroundColor(.secondary)
+                                            .font(.caption)
+                                    }
                                 }
-                            }) {
-                                HStack {
-                                    Text(conversation.title)
-                                        .foregroundColor(.primary)
-                                        .padding(.leading, 10)
-                                    
-                                    Spacer()
-                                    
-                                    Text(conversation.createdAt, style: .date)
-                                        .foregroundColor(.secondary)
-                                        .font(.caption)
+                                
+                                Button(action: {
+                                    conversationToDelete = conversation
+                                    showingDeleteConfirmation = true
+                                }) {
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.red)
                                 }
-                                .padding()
-                                .background(Color.gray.opacity(0.1))
-                                .cornerRadius(8)
+                                .padding(.trailing, 10)
                             }
+                            .padding()
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(8)
                             .padding(.horizontal)
                         }
                     }
@@ -394,10 +439,49 @@ struct ChatHistoryView: View {
         }
         .background(Color.white)
         .onAppear {
-            fetchConversations()  // Call fetchConversations when the view appears
+            fetchConversations()
             print("ChatHistoryView appeared with \(conversations.count) conversations")
         }
+        .alert(isPresented: $showingDeleteConfirmation) {
+            Alert(
+                title: Text("Delete Conversation"),
+                message: Text("Are you sure you want to delete this conversation?"),
+                primaryButton: .destructive(Text("Delete")) {
+                    if let conversation = conversationToDelete {
+                        deleteConversation(conversation.id)
+                    }
+                },
+                secondaryButton: .cancel()
+            )
+        }
     }
+
+    // private func deleteConversation(_ conversation: Conversation) {
+    //     // API call to delete conversation
+    //     let url = URL(string: "http://127.0.0.1:8000/conversations/\(conversation.id)")!
+    //     var request = URLRequest(url: url)
+    //     request.httpMethod = "DELETE"
+    //     let storedToken = UserDefaults.standard.string(forKey: "authToken") ?? ""
+    //     request.setValue("Bearer \(storedToken)", forHTTPHeaderField: "Authorization")
+
+    //     URLSession.shared.dataTask(with: request) { data, response, error in
+    //         if let error = error {
+    //             print("Error deleting conversation: \(error.localizedDescription)")
+    //             return
+    //         }
+            
+    //         if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+    //             DispatchQueue.main.async {
+    //                 if let index = self.conversations.firstIndex(where: { $0.id == conversation.id }) {
+    //                     self.conversations.remove(at: index)
+    //                 }
+    //             }
+    //         } else {
+    //             print("Failed to delete conversation")
+    //         }
+    //     }.resume()
+    // }
+
 }
 
 //#Preview {
