@@ -3,7 +3,7 @@
 //  Tekk
 //
 //  Created by Jordan on 8/19/24.
-//
+//  This file contains the CameraManager, which is used to manage the camera.
 
 import Foundation
 import AVFoundation

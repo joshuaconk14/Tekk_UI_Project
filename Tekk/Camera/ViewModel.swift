@@ -3,7 +3,7 @@
 //  Tekk
 //
 //  Created by Jordan on 8/19/24.
-//
+//  This file contains the ViewModel, which is used to manage the camera feed.
 
 import Foundation
 import CoreImage

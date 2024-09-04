@@ -3,7 +3,7 @@
 //  Tekk
 //
 //  Created by Jordan on 8/19/24.
-//
+//  This file contains the extension for CMSampleBuffer to convert it to CGImage.
 
 import AVFoundation
 import CoreImage

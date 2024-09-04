@@ -3,7 +3,7 @@
 //  Tekk
 //
 //  Created by Jordan on 7/9/24.
-//
+//  This file contains the main view of the app.
 
 import SwiftUI
 //import GoogleGenerativeAI

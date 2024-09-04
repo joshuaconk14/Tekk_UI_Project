@@ -3,7 +3,7 @@
 //  Tekk
 //
 //  Created by Jordan on 8/26/24.
-//
+//  This file contains the LoginView, which is used to login the user.
 
 import SwiftUI
 

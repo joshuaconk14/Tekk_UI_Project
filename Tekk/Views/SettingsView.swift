@@ -3,7 +3,7 @@
 //  Tekk-frontend
 //
 //  Created by Jordan on 7/6/24.
-//
+//  This file contains the SettingsView, which is used to display the settings for the user.
 
 import SwiftUI
 
