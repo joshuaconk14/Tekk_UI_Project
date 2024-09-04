@@ -258,7 +258,7 @@ struct ChatbotView: View {
         .resume()
     }
 
-    // TODO: use for when user logs into the app
+    // API call to fetch previous conversations when user opens Chat History
     func fetchConversations() {
         let url = URL(string: "http://127.0.0.1:8000/get_previous_conversations/")!
         var request = URLRequest(url: url)
