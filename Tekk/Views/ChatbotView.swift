@@ -13,6 +13,11 @@ struct ConversationResponse: Codable {
     let messages: [APIMessage]
 }
 
+// expected response structure from backend after GET request to get_conversation_history endpoint
+struct PreviousConversationsResponse: Codable {
+    let conversations: [Conversation]
+}
+
 // structure for messages in a conversation
 struct APIMessage: Codable {
     let role: String
@@ -33,7 +38,7 @@ struct TutorialResponse: Codable {
     // let created_at: String
 }
 
-// structure for a conversation
+// structure for a conversation, displayed in ChatHistoryView to show previous conversations
 struct Conversation: Identifiable, Codable {
     let id: String
     var title: String
@@ -57,9 +62,17 @@ struct ChatbotView: View {
                 VStack {
                     // Header
                     HStack {
+                        // Button(action: {
+                        //     withAnimation(.spring()) {
+                        //         isShowingHistory.toggle()
+                        //     }
+                        // }) {
                         Button(action: {
                             withAnimation(.spring()) {
                                 isShowingHistory.toggle()
+                                if isShowingHistory {
+                                    fetchConversations()
+                                }
                             }
                         }) {
                             Image(systemName: "line.horizontal.3")
@@ -131,7 +144,8 @@ struct ChatbotView: View {
                     ChatHistoryView(isShowingHistory: $isShowingHistory, 
                                     selectedSessionID: $selectedSessionID,
                                     conversations: $conversations,
-                                    loadConversation: loadConversation)
+                                    loadConversation: loadConversation,
+                                    fetchConversations: fetchConversations)
                     .frame(width: geometry.size.width * 0.75)
                     .transition(.move(edge: .leading))
                     .zIndex(2)  
@@ -280,12 +294,15 @@ struct ChatbotView: View {
         .resume()
     }
 
+    // TODO: use for when user logs into the app
     func fetchConversations() {
-        let url = URL(string: "http://127.0.0.1:8000/conversations/")!
+        let url = URL(string: "http://127.0.0.1:8000/get_conversation_history/")!
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         let storedToken = UserDefaults.standard.string(forKey: "authToken") ?? ""
         request.setValue("Bearer \(storedToken)", forHTTPHeaderField: "Authorization")
+        
+        print("Fetching conversations with token: \(storedToken)")
 
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
@@ -293,20 +310,39 @@ struct ChatbotView: View {
                 return
             }
             
+            if let httpResponse = response as? HTTPURLResponse {
+                print("HTTP Status code: \(httpResponse.statusCode)")
+            }
+            
             guard let data = data else {
                 print("No data received when fetching conversations")
                 return
             }
             
+            print("Raw data received: \(String(data: data, encoding: .utf8) ?? "Unable to convert data to string")")
+            
             do {
+                // decode the date field in the response
                 let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-                let response = try decoder.decode([Conversation].self, from: data)
+                decoder.dateDecodingStrategy = .custom { decoder in
+                    let container = try decoder.singleValueContainer()
+                    let dateString = try container.decode(String.self)
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+                    formatter.timeZone = TimeZone(secondsFromGMT: 0)
+                    if let date = formatter.date(from: dateString) {
+                        return date
+                    }
+                    throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid date format")
+                }
+                let response = try decoder.decode(PreviousConversationsResponse.self, from: data)
+                print("Successfully decoded response. Number of conversations: \(response.conversations.count)")
                 DispatchQueue.main.async {
-                    self.conversations = response
+                    self.conversations = response.conversations.sorted(by: { $0.createdAt > $1.createdAt })
+                    print("Updated conversations: \(self.conversations)")
                 }
             } catch {
-                print("Error parsing conversations response: \(error.localizedDescription)")
+                print("Error parsing conversations response: \(error)")
             }
         }.resume()
     }
@@ -340,12 +376,13 @@ struct MessageView: View {
     }
 }
 
-// View of previous user conversations
+
 struct ChatHistoryView: View {
     @Binding var isShowingHistory: Bool
     @Binding var selectedSessionID: String
     @Binding var conversations: [Conversation]
     var loadConversation: (String) -> Void
+    var fetchConversations: () -> Void  // Add this line
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -354,38 +391,48 @@ struct ChatHistoryView: View {
                 .padding(.top, 20)
                 .padding(.leading, 10)
             
-            ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
-                    ForEach(conversations) { conversation in
-                        Button(action: {
-                            loadConversation(conversation.id)
-                            withAnimation(.spring()) {
-                                isShowingHistory = false
+            if conversations.isEmpty {
+                Text("No conversations yet")
+                    .foregroundColor(.gray)
+                    .padding()
+            } else {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 10) {
+                        ForEach(conversations) { conversation in
+                            Button(action: {
+                                loadConversation(conversation.id)
+                                withAnimation(.spring()) {
+                                    isShowingHistory = false
+                                }
+                            }) {
+                                HStack {
+                                    Text(conversation.title)
+                                        .foregroundColor(.primary)
+                                        .padding(.leading, 10)
+                                    
+                                    Spacer()
+                                    
+                                    Text(conversation.createdAt, style: .date)
+                                        .foregroundColor(.secondary)
+                                        .font(.caption)
+                                }
+                                .padding()
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(8)
                             }
-                        }) {
-                            HStack {
-                                Text(conversation.title)
-                                    .foregroundColor(.primary)
-                                    .padding(.leading, 10)
-                                
-                                Spacer()
-                                
-                                Text(conversation.createdAt, style: .date)
-                                    .foregroundColor(.secondary)
-                                    .font(.caption)
-                            }
-                            .padding()
-                            .background(Color.gray.opacity(0.1))
-                            .cornerRadius(8)
+                            .padding(.horizontal)
                         }
-                        .padding(.horizontal)
                     }
+                    .padding(.top, 10)
                 }
-                .padding(.top, 10)
             }
             Spacer()
         }
         .background(Color.white)
+        .onAppear {
+            fetchConversations()  // Call fetchConversations when the view appears
+            print("ChatHistoryView appeared with \(conversations.count) conversations")
+        }
     }
 }
 
