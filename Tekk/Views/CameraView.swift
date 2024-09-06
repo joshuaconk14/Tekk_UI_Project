@@ -3,7 +3,7 @@
 //  Tekk-frontend
 //
 //  Created by Jordan on 7/6/24.
-//
+//  This file contains the CameraView, which is used to display the camera feed.
 
 import SwiftUI
 

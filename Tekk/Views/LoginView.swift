@@ -3,7 +3,7 @@
 //  Tekk
 //
 //  Created by Jordan on 8/26/24.
-//
+//  This file contains the LoginView, which is used to login the user.
 
 import SwiftUI
 
@@ -13,10 +13,15 @@ struct LoginResponse: Codable {
     let token_type: String
 }
 
+struct ConversationsResponse: Codable {
+    let conversations: [Conversation]
+}
+
 struct LoginView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var errorMessage = ""
+    @State private var conversations: [Conversation] = []
     @Binding var isLoggedIn: Bool
     @Binding var authToken: String
 
@@ -88,6 +93,9 @@ struct LoginView: View {
                     print("Login success: \(self.isLoggedIn)")
                     // TODO make this a secure key
                     UserDefaults.standard.set(self.authToken, forKey: "authToken")
+
+                    // // Fetch conversations after successful login
+                    // self.fetchConversations()
                 }
             } else {
                 DispatchQueue.main.async {
@@ -102,6 +110,7 @@ struct LoginView: View {
             }
         }.resume()
     }
+
 }
 
 //struct LoginView_Previews: PreviewProvider {

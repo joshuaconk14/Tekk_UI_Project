@@ -3,7 +3,7 @@
 //  Tekk
 //
 //  Created by Jordan on 8/19/24.
-//
+//  This file contains the extension for CIImage to convert it to CGImage.
 
 import CoreImage
 

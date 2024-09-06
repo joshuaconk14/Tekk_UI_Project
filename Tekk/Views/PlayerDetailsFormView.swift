@@ -3,7 +3,7 @@
 //  Tekk
 //
 //  Created by Jordan on 8/26/24.
-//
+//  This file contains the PlayerDetailsFormView, which is used to collect player details for the user.
 
 import Foundation
 import SwiftUI
