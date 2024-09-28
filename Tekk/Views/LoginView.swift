@@ -32,14 +32,22 @@ struct LoginView: View {
 
     var body: some View {
         VStack {
+            // insert bravo animation
+            RiveViewModel(fileName: "test_panting").view()
+                .scaleEffect(0.7)
+                .offset(x: 0, y: 70)
+            
             Spacer()
             Spacer()
             Spacer()
             Spacer()
-            Text("insert bravo")
+            Text("Bravotekk")
                 .font(.largeTitle)
-                .padding()
                 .foregroundColor(.white)
+                .offset(x: 0, y: -10)
+            Text("Start Small. Dream Big")
+                .foregroundColor(.white)
+                .offset(x: 0, y: -10)
             Spacer()
             Spacer()
 
@@ -101,13 +109,6 @@ struct LoginView: View {
                 .padding(.horizontal)
 
                 Spacer()
-            } else {
-                // Rive animation view
-                RiveViewModel(fileName: "sitting_motion").view() // Replace with your Rive file name
-                    .frame(width: 300, height: 300) // Set the desired frame size
-                    .onAppear {
-                        // Optionally start the animation when the view appears
-                    }
             }
         }
         .padding()
@@ -167,8 +168,8 @@ struct LoginView: View {
 
 }
 
-struct LoginView_Previews: PreviewProvider {
-    static var previews: some View {
-        LoginView(isLoggedIn: .constant(false), authToken: .constant(""))
-    }
-}
+//struct LoginView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        LoginView(isLoggedIn: .constant(false), authToken: .constant(""))
+//    }
+//}

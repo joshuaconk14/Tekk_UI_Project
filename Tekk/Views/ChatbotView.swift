@@ -559,18 +559,24 @@ struct ChatHistoryView: View {
     // }
 
 
-struct ChatbotView_Previews: PreviewProvider {
-    static var previews: some View {
-        ChatbotView(
-            chatMessages: .constant([Message_Struct(role: "assistant", content: "Welcome to TekkAI")]),
-            authToken: .constant("sample_token"),
-            conversations: .constant([
-                Conversation(id: "1", title: "Dribbling Techniques", createdAt: Date().addingTimeInterval(-86400)),
-                Conversation(id: "2", title: "Penalty Kick Strategy", createdAt: Date().addingTimeInterval(-172800)),
-                Conversation(id: "3", title: "Defensive Positioning", createdAt: Date().addingTimeInterval(-259200)),
-                Conversation(id: "4", title: "Fitness Training", createdAt: Date().addingTimeInterval(-345600)),
-                Conversation(id: "5", title: "Team Tactics", createdAt: Date().addingTimeInterval(-432000))
-            ])
-        )
-    }
-}
+
+
+
+
+// Preview
+
+//struct ChatbotView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        ChatbotView(
+//            chatMessages: .constant([Message_Struct(role: "assistant", content: "Welcome to TekkAI")]),
+//            authToken: .constant("sample_token"),
+//            conversations: .constant([
+//                Conversation(id: "1", title: "Dribbling Techniques", createdAt: Date().addingTimeInterval(-86400)),
+//                Conversation(id: "2", title: "Penalty Kick Strategy", createdAt: Date().addingTimeInterval(-172800)),
+//                Conversation(id: "3", title: "Defensive Positioning", createdAt: Date().addingTimeInterval(-259200)),
+//                Conversation(id: "4", title: "Fitness Training", createdAt: Date().addingTimeInterval(-345600)),
+//                Conversation(id: "5", title: "Team Tactics", createdAt: Date().addingTimeInterval(-432000))
+//            ])
+//        )
+//    }
+//}
