@@ -6,7 +6,7 @@
 //  This file contains the LoginView, which is used to login the user.
 
 import SwiftUI
-import RiveRuntime
+import RiveRuntime 
 
 
 // expected response structure from backend after POST request to login endpoint
