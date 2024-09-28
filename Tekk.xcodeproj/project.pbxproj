@@ -24,6 +24,8 @@
 		17E693222C745811006B58A3 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E693212C745811006B58A3 /* ViewModel.swift */; };
 		17E693242C7C6F51006B58A3 /* PlayerDetailsFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E693232C7C6F51006B58A3 /* PlayerDetailsFormView.swift */; };
 		17E693272C7D3504006B58A3 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E693262C7D3504006B58A3 /* LoginView.swift */; };
+		435A70152CA7AB2600BFCC40 /* RiveRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 435A70142CA7AB2600BFCC40 /* RiveRuntime */; };
+		439A72642C9FA55700B4C5AD /* sitting_motion.riv in Resources */ = {isa = PBXBuildFile; fileRef = 439A72622C9FA55700B4C5AD /* sitting_motion.riv */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,6 +68,7 @@
 		17E693212C745811006B58A3 /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
 		17E693232C7C6F51006B58A3 /* PlayerDetailsFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerDetailsFormView.swift; sourceTree = "<group>"; };
 		17E693262C7D3504006B58A3 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		439A72622C9FA55700B4C5AD /* sitting_motion.riv */ = {isa = PBXFileReference; lastKnownFileType = file; path = sitting_motion.riv; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +76,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				435A70152CA7AB2600BFCC40 /* RiveRuntime in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -123,6 +127,7 @@
 				170217BA2C89030400DD020C /* Models.swift */,
 				1749361B2C3E102B001163B9 /* ContentView.swift */,
 				1749361D2C3E1031001163B9 /* Assets.xcassets */,
+				439A72632C9FA55700B4C5AD /* RiveAssets */,
 				1749361F2C3E1031001163B9 /* Tekk.entitlements */,
 				174936202C3E1031001163B9 /* Preview Content */,
 			);
@@ -175,6 +180,14 @@
 				17E693212C745811006B58A3 /* ViewModel.swift */,
 			);
 			path = Camera;
+			sourceTree = "<group>";
+		};
+		439A72632C9FA55700B4C5AD /* RiveAssets */ = {
+			isa = PBXGroup;
+			children = (
+				439A72622C9FA55700B4C5AD /* sitting_motion.riv */,
+			);
+			path = RiveAssets;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -265,6 +278,9 @@
 				Base,
 			);
 			mainGroup = 1749360D2C3E102B001163B9;
+			packageReferences = (
+				435A70132CA7A33B00BFCC40 /* XCRemoteSwiftPackageReference "rive-ios" */,
+			);
 			productRefGroup = 174936172C3E102B001163B9 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -283,6 +299,7 @@
 			files = (
 				174936222C3E1031001163B9 /* Preview Assets.xcassets in Resources */,
 				1749361E2C3E1031001163B9 /* Assets.xcassets in Resources */,
+				439A72642C9FA55700B4C5AD /* sitting_motion.riv in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -478,7 +495,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Tekk/Preview Content\"";
-				DEVELOPMENT_TEAM = J36CXA7LCG;
+				DEVELOPMENT_TEAM = 9NT64FVZCY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Tekk/Info.plist;
@@ -517,7 +534,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Tekk/Preview Content\"";
-				DEVELOPMENT_TEAM = J36CXA7LCG;
+				DEVELOPMENT_TEAM = 9NT64FVZCY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Tekk/Info.plist;
@@ -673,6 +690,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		435A70132CA7A33B00BFCC40 /* XCRemoteSwiftPackageReference "rive-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/rive-app/rive-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.1.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		435A70142CA7AB2600BFCC40 /* RiveRuntime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 435A70132CA7A33B00BFCC40 /* XCRemoteSwiftPackageReference "rive-ios" */;
+			productName = RiveRuntime;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1749360E2C3E102B001163B9 /* Project object */;
 }

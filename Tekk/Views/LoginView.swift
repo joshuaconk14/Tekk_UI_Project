@@ -6,6 +6,8 @@
 //  This file contains the LoginView, which is used to login the user.
 
 import SwiftUI
+import RiveRuntime
+
 
 // expected response structure from backend after POST request to login endpoint
 struct LoginResponse: Codable {
@@ -24,41 +26,93 @@ struct LoginView: View {
     @State private var conversations: [Conversation] = []
     @Binding var isLoggedIn: Bool
     @Binding var authToken: String
+    @State private var showAnimation = false
+    @State private var showLoginForm = true // State variable to toggle between login form and animation
+    
 
     var body: some View {
         VStack {
-            Text("Login")
+            Spacer()
+            Spacer()
+            Spacer()
+            Spacer()
+            Text("insert bravo")
                 .font(.largeTitle)
                 .padding()
-
-            TextField("Email", text: $email)
-                .keyboardType(.emailAddress)
-                .autocapitalization(.none)
-                .padding()
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-
-            SecureField("Password", text: $password)
-                .padding()
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-
-            if !errorMessage.isEmpty {
-                Text(errorMessage)
-                    .foregroundColor(.red)
-            }
-
-            Button(action: loginUser) {
-                Text("Login")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            .padding()
-
+                .foregroundColor(.white)
             Spacer()
+            Spacer()
+
+            if showLoginForm {
+                // Login form UI
+                TextField("Email", text: $email)
+                    .keyboardType(.emailAddress)
+                    .autocapitalization(.none)
+                    .padding()
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                SecureField("Password", text: $password)
+                    .padding()
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+
+            // TextField("Email", text: $email)
+            //     .keyboardType(.emailAddress)
+            //     .autocapitalization(.none)
+            //     .padding()
+            //     .textFieldStyle(RoundedBorderTextFieldStyle())
+
+//            SecureField("Password", text: $password)
+//                .padding()
+//                .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                if !errorMessage.isEmpty {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                }
+
+                Button(action: loginUser) {
+                    Text("Login")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(20)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.blue.opacity(0.2), lineWidth: 6)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 6)
+                        )
+                }
+                .padding(.horizontal)
+
+                Button(action: loginUser) {
+                    Text("Create an account")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.green)
+                        .foregroundColor(.black)
+                        .cornerRadius(20)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.gray.opacity(0.2), lineWidth: 6)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 6)
+                        )
+                }
+                .padding(.horizontal)
+
+                Spacer()
+            } else {
+                // Rive animation view
+                RiveViewModel(fileName: "sitting_motion").view() // Replace with your Rive file name
+                    .frame(width: 300, height: 300) // Set the desired frame size
+                    .onAppear {
+                        // Optionally start the animation when the view appears
+                    }
+            }
         }
         .padding()
+        .background(Color.green)
+
     }
 
     func loginUser() {
@@ -113,8 +167,8 @@ struct LoginView: View {
 
 }
 
-//struct LoginView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        LoginView()
-//    }
-//}
+struct LoginView_Previews: PreviewProvider {
+    static var previews: some View {
+        LoginView(isLoggedIn: .constant(false), authToken: .constant(""))
+    }
+}

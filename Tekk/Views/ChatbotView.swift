@@ -16,6 +16,11 @@ struct ChatbotView: View {
     @Binding var authToken: String
     @State private var viewModel = ViewModel()
     @Binding var conversations: [Conversation]
+    @State private var activeTab: Tab = .messages
+
+    enum Tab {
+        case messages, camera, modifier
+    }
     
     var body: some View {
         GeometryReader { geometry in
@@ -39,20 +44,29 @@ struct ChatbotView: View {
                         }) {
                             Image(systemName: "line.horizontal.3")
                                 .font(.largeTitle)
-                                .foregroundColor(.green)
+                                .foregroundColor(.white)
                         }
+                        Spacer()
                         Text("TekkAI")
                             .font(.largeTitle)
                             .bold()
+                            .foregroundColor(.white)
                         
+                        Spacer()
                         Button(action: startNewConversation) {
                             Image(systemName: "bubble.left.fill")
                                 .font(.system(size: 26))
-                                .foregroundColor(Color.green)
+                                .foregroundColor(Color.white)
                         }
                     }
+                    // header customization
                     .padding()
+                    .frame(width: geometry.size.width)
+                    .background(Color.green)
                     
+                    
+                    
+
                     // Chat messages
                     ScrollView {
                         ForEach(chatMessages) { message in
@@ -61,14 +75,21 @@ struct ChatbotView: View {
                         .rotationEffect(.degrees(180))
                     }
                     .rotationEffect(.degrees(180))
-                    .background(Color.gray.opacity(0.10))
+                    .background(Color.gray.opacity(0.2))
+                    .background(Color.black.opacity(0.85))
                     
                     // Message input
                     HStack {
                         TextField("Let's get Tekky", text: $messageText)
-                            .padding() 
-                            .background(Color.gray.opacity(0.1))
-                            .cornerRadius(8)
+                            .padding()
+                            .background(Color.white)
+                            .cornerRadius(15)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 15)
+                                .stroke(Color.gray.opacity(0.2), lineWidth: 6)
+                                .stroke(Color.black.opacity(0.2), lineWidth: 6)
+                            )
+                            .accentColor(.black) // This sets the cursor color
                             .onSubmit {
                                 sendMessage(message: messageText)
                                 messageText = ""
@@ -79,18 +100,39 @@ struct ChatbotView: View {
                             messageText = ""
                         } label: {
                             Image(systemName: "paperplane.fill")
-                                .foregroundColor(.green)
+                                .foregroundColor(.white)
                         }
                         .font(.system(size: 26))
                         .padding(.horizontal, 10)
                     }
                     .padding()
+                    .background(Color.green)
+                    //.background(Color.gray.opacity(0.6)
+
+                    // Navigation Bar
+                    VStack(spacing: 0) {
+                        Divider()
+                            .background(Color.gray.opacity(0.8))
+                            .frame(height: 1)
+                        HStack {
+                            Spacer()
+                            navigationButton(tab: .messages, icon: "message")
+                            Spacer()
+                            navigationButton(tab: .camera, icon: "camera")
+                            Spacer()
+                            navigationButton(tab: .modifier, icon: "slider.horizontal.3")
+                            Spacer()
+                        }
+                        .padding(.vertical, 30)
+                        .background(Color.white)
+                    }
                 }
                 .zIndex(0)
                 
                 // Overlay when history is showing (only over the chat area)
                 if isShowingHistory {
                     Color.black.opacity(0.3)
+                        .edgesIgnoringSafeArea(.all)
                         .frame(width: geometry.size.width, height: geometry.size.height)
                         .transition(.opacity)
                         .onTapGesture {
@@ -111,9 +153,20 @@ struct ChatbotView: View {
                                     deleteConversation: deleteConversation) 
                     .frame(width: geometry.size.width * 0.75)
                     .transition(.move(edge: .leading))
-                    .zIndex(2)  
+                    .zIndex(2) 
                 }
             }
+        }
+    }
+
+    // navigation bar buttons
+    private func navigationButton(tab: Tab, icon: String) -> some View {
+        Button(action: {
+            activeTab = tab
+        }) {
+            Image(systemName: icon)
+                .font(.system(size: 24))
+                .foregroundColor(.black)
         }
     }
     
@@ -361,7 +414,8 @@ struct MessageView: View {
             } else {
                 Text(message.content)
                     .padding()
-                    .background(.gray.opacity(0.15))
+                    .foregroundColor(.black)
+                    .background(Color.white)
                     .cornerRadius(10)
                     .padding(.horizontal, 16)
                     .padding(.bottom, 10)
@@ -372,6 +426,7 @@ struct MessageView: View {
 }
 
 
+// chat history views
 struct ChatHistoryView: View {
     @Binding var isShowingHistory: Bool
     @Binding var selectedSessionID: String
@@ -382,62 +437,83 @@ struct ChatHistoryView: View {
     @State private var showingDeleteConfirmation = false
     @State private var conversationToDelete: Conversation?
 
+
     var body: some View {
-        VStack(alignment: .leading) {
-            Text("Chat History")
-                .font(.largeTitle)
-                .padding(.top, 20)
-                .padding(.leading, 10)
-            
-            if conversations.isEmpty {
-                Text("No conversations yet")
-                    .foregroundColor(.gray)
-                    .padding()
-            } else {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 10) {
-                        ForEach(conversations) { conversation in
-                            HStack {
-                                Button(action: {
-                                    loadConversation(conversation.id)
-                                    withAnimation(.spring()) {
-                                        isShowingHistory = false
-                                    }
-                                }) {
-                                    HStack {
-                                        Text(conversation.title)
-                                            .foregroundColor(.primary)
-                                            .padding(.leading, 10)
-                                        
-                                        Spacer()
-                                        
-                                        Text(conversation.createdAt, style: .date)
-                                            .foregroundColor(.secondary)
-                                            .font(.caption)
-                                    }
-                                }
-                                
-                                Button(action: {
-                                    conversationToDelete = conversation
-                                    showingDeleteConfirmation = true
-                                }) {
-                                    Image(systemName: "trash")
-                                        .foregroundColor(.red)
-                                }
-                                .padding(.trailing, 10)
-                            }
-                            .padding()
-                            .background(Color.gray.opacity(0.1))
-                            .cornerRadius(8)
-                            .padding(.horizontal)
+        GeometryReader { geometry in
+            VStack (spacing:0) {
+                //green header
+                HStack {
+                    Text("Chat History")
+                        .font(.largeTitle)
+                        .padding(.top, 20)
+                        .foregroundColor(.white)
+                    Spacer()
+                    Button(action: {
+                        withAnimation(.spring()) {
+                            isShowingHistory = false
                         }
+                    }) {
+                        Image(systemName:"xmark")
+                            .font(.title2)
+                            .foregroundColor(.white)
                     }
-                    .padding(.top, 10)
                 }
+                .padding()
+                .frame(width: geometry.size.width)
+                .background(Color.green)
+                
+                // chat history content
+                if conversations.isEmpty {
+                    Text("No conversations yet")
+                        .foregroundColor(.gray)
+                        .padding()
+                } else {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 10) {
+                            ForEach(conversations) { conversation in
+                                HStack {
+                                    Button(action: {
+                                        loadConversation(conversation.id)
+                                        withAnimation(.spring()) {
+                                            isShowingHistory = false
+                                        }
+                                    }) {
+                                        HStack {
+                                            Text(conversation.title)
+                                                .foregroundColor(.primary)
+                                                .padding(.leading, 10)
+                                            
+                                            Spacer()
+                                            
+                                            Text(conversation.createdAt, style: .date)
+                                                .foregroundColor(.secondary)
+                                                .font(.caption)
+                                        }
+                                    }
+                                    
+                                    Button(action: {
+                                        conversationToDelete = conversation
+                                        showingDeleteConfirmation = true
+                                    }) {
+                                        Image(systemName: "trash")
+                                            .foregroundColor(.red)
+                                    }
+                                    .padding(.trailing, 10)
+                                }
+                                .padding()
+                                .background(Color.white)
+                                .cornerRadius(8)
+                                .padding(.horizontal)
+                            }
+                        }
+                        .padding(.top, 30)
+                    }
+                }
+                Spacer()
             }
-            Spacer()
+            .frame(width: geometry.size.width)
+            .background(Color.green)
         }
-        .background(Color.white)
         .onAppear {
             fetchConversations()
             print("ChatHistoryView appeared with \(conversations.count) conversations")
@@ -455,7 +531,7 @@ struct ChatHistoryView: View {
             )
         }
     }
-
+}
     // private func deleteConversation(_ conversation: Conversation) {
     //     // API call to delete conversation
     //     let url = URL(string: "http://127.0.0.1:8000/conversations/\(conversation.id)")!
@@ -482,9 +558,19 @@ struct ChatHistoryView: View {
     //     }.resume()
     // }
 
-}
 
-//#Preview {
-//    // Allow chatmessages to be accessed by parent ContentView
-//    ChatbotView(chatMessages: .constant([Message_Struct(role: "assistant", content: "Welcome to TekkAI")]))
-//}
+struct ChatbotView_Previews: PreviewProvider {
+    static var previews: some View {
+        ChatbotView(
+            chatMessages: .constant([Message_Struct(role: "assistant", content: "Welcome to TekkAI")]),
+            authToken: .constant("sample_token"),
+            conversations: .constant([
+                Conversation(id: "1", title: "Dribbling Techniques", createdAt: Date().addingTimeInterval(-86400)),
+                Conversation(id: "2", title: "Penalty Kick Strategy", createdAt: Date().addingTimeInterval(-172800)),
+                Conversation(id: "3", title: "Defensive Positioning", createdAt: Date().addingTimeInterval(-259200)),
+                Conversation(id: "4", title: "Fitness Training", createdAt: Date().addingTimeInterval(-345600)),
+                Conversation(id: "5", title: "Team Tactics", createdAt: Date().addingTimeInterval(-432000))
+            ])
+        )
+    }
+}
