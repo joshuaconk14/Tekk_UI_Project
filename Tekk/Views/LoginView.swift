@@ -28,7 +28,7 @@ struct LoginView: View {
     @Binding var authToken: String
     @State private var showAnimation = false
     @State private var showLoginForm = true // State variable to toggle between login form and animation
-    
+
 
     var body: some View {
         VStack {
