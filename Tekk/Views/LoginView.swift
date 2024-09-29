@@ -35,8 +35,7 @@ struct LoginView: View {
             // insert bravo animation
             RiveViewModel(fileName: "test_panting").view()
                 .scaleEffect(0.7)
-                .offset(x: 0, y: 70)
-            
+                .offset(x: 0, y: 70) 
             Spacer()
             Spacer()
             Spacer()
